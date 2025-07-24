@@ -32,7 +32,7 @@ RUN curl -L "https://github.com/serizba/salad/releases/download/v1.0.0/dino_sala
     https://dl.fbaipublicfiles.com/dinov2/dinov2_vitb14/dinov2_vitb14_pretrain.pth && \
     (wget -O ./weights/ORBvoc.txt.tar.gz \
     https://github.com/UZ-SLAMLab/ORB_SLAM3/raw/master/Vocabulary/ORBvoc.txt.tar.gz) & wait && \
-    tar -xzvf ./weights/ORBvoc.txt.tar.gz && \
+    tar -xzvf ./weights/ORBvoc.txt.tar.gz -C ./weights && \
     rm ./weights/ORBvoc.txt.tar.gz
 
 RUN conda init bash && . ~/.bashrc && \
