@@ -1,5 +1,5 @@
 #!/bin/bash          
-PROJECT_DIR="../"
+PROJECT_DIR="/your/path/to/VGGT-Long"
 DATASET_DIR="/mnt/raid/dataset"
 
 sudo docker remove -f vggt-long
@@ -16,4 +16,5 @@ sudo docker run --name vggt-long -t -d --gpus 'all,"capabilities=compute,utility
 xhost -si:localuser:root
 xhost si:localuser:root
 
-sudo docker exec -it vggt-long /bin/bash --login
+sudo docker exec -it vggt /bin/bash -c "rm -rf /home/VGGT-Long/weights && ln -s /workspace/VGGT-Long/weights /home/VGGT-Long/weights"
+sudo docker exec -it -w /home/VGGT-Long vggt /bin/bash --login
