@@ -211,3 +211,4 @@ ORBvoc.txt
 exp.sh
 launch.json
 vggt/*/__pycache__/*
+weights/*
