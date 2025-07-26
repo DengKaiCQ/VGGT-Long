@@ -1,0 +1,1 @@
+docker -D build -t vggt-long:latest .
