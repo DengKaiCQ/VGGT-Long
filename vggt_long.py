@@ -268,13 +268,13 @@ class VGGT_Long:
 
         print("Aligning all the chunks...")
         for chunk_idx in range(len(self.chunk_indices)-1):
-            print(chunk_idx, chunk_idx+1)
+            # print(chunk_idx, chunk_idx+1)
 
-            chunk_data = np.load(os.path.join(self.result_unaligned_dir, f"chunk_{chunk_idx}.npy"), allow_pickle=True).item()
+            # chunk_data = np.load(os.path.join(self.result_unaligned_dir, f"chunk_{chunk_idx}.npy"), allow_pickle=True).item()
             
-            points = chunk_data['world_points'].reshape(-1, 3)
-            colors = (chunk_data['images'].transpose(0, 2, 3, 1).reshape(-1, 3) * 255).astype(np.uint8)
-            confs = chunk_data['world_points_conf'].reshape(-1)
+            # points = chunk_data['world_points'].reshape(-1, 3)
+            # colors = (chunk_data['images'].transpose(0, 2, 3, 1).reshape(-1, 3) * 255).astype(np.uint8)
+            # confs = chunk_data['world_points_conf'].reshape(-1)
 
             print(f"Aligning {chunk_idx} and {chunk_idx+1} (Total {len(self.chunk_indices)-1})")
             chunk_data1 = np.load(os.path.join(self.result_unaligned_dir, f"chunk_{chunk_idx}.npy"), allow_pickle=True).item()
