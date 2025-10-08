@@ -13,7 +13,10 @@ Model:
   delete_temp_files: True
   align_method: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
   using_sim3: True # Using SIM(3) alignment if True, while using SE(3) alignment if False
-
+  reference_frame_mid: True 
+  # If reference_frame_mid == True, use the middle frame within the chunk as the 
+  # reference frame to alleviate the scale drift when loop closure is not available.
+  
   IRLS:
     delta: 0.1
     max_iters: 5

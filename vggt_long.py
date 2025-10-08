@@ -190,11 +190,54 @@ class VGGT_Long:
         assert len(images.shape) == 4
         assert images.shape[1] == 3
 
-        torch.cuda.empty_cache()
-        with torch.no_grad():
-            with torch.cuda.amp.autocast(dtype=self.dtype):
-                predictions = self.model(images)
-        torch.cuda.empty_cache()
+        if config['Model']['reference_frame_mid'] == True:
+            torch.cuda.empty_cache()
+            with torch.no_grad():
+                with torch.cuda.amp.autocast(dtype=self.dtype):
+                    mid_idx = len(images) // 2
+                    images = torch.cat(
+                        [images[mid_idx:mid_idx+1],
+                        images[:mid_idx],
+                        images[mid_idx+1:]
+                        ], dim=0)
+                    predictions = self.model(images)
+                    predictions["depth"] = torch.cat([
+                        predictions["depth"][:, 1:mid_idx+1],
+                        predictions["depth"][:, :1],
+                        predictions["depth"][:, mid_idx+1:]
+                        ], dim=1)
+                    predictions["depth_conf"] = torch.cat([
+                        predictions["depth_conf"][:, 1:mid_idx+1],
+                        predictions["depth_conf"][:, :1],
+                        predictions["depth_conf"][:, mid_idx+1:]
+                        ], dim=1)
+                    predictions["world_points"] = torch.cat([
+                        predictions["world_points"][:, 1:mid_idx+1],
+                        predictions["world_points"][:, :1],
+                        predictions["world_points"][:, mid_idx+1:]
+                        ], dim=1)
+                    predictions["world_points_conf"] = torch.cat([
+                        predictions["world_points_conf"][:, 1:mid_idx+1],
+                        predictions["world_points_conf"][:, :1],
+                        predictions["world_points_conf"][:, mid_idx+1:]
+                        ], dim=1)
+                    predictions["pose_enc"] = torch.cat([
+                        predictions["pose_enc"][:, 1:mid_idx+1],
+                        predictions["pose_enc"][:, :1],
+                        predictions["pose_enc"][:, mid_idx+1:]
+                        ], dim=1)
+                    predictions["images"] = torch.cat([
+                        predictions["images"][:, 1:mid_idx+1],
+                        predictions["images"][:, :1],
+                        predictions["images"][:, mid_idx+1:]
+                        ], dim=1)
+            torch.cuda.empty_cache()
+        else:
+            torch.cuda.empty_cache()
+            with torch.no_grad():
+                with torch.cuda.amp.autocast(dtype=self.dtype):
+                    predictions = self.model(images)
+            torch.cuda.empty_cache()
 
         print("Converting pose encoding to extrinsic and intrinsic matrices...")
         extrinsic, intrinsic = pose_encoding_to_extri_intri(predictions["pose_enc"], images.shape[-2:])
