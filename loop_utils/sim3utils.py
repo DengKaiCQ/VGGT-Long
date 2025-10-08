@@ -289,39 +289,110 @@ def save_confident_pointcloud_batch(points, colors, confs, output_path, conf_thr
                     remaining_pts = valid_pts[fill_count:]
                     remaining_cls = valid_cls[fill_count:]
                     
-                    count, reservoir_pts, reservoir_clr = vectorized_reservoir_sampling(
+                    count, reservoir_pts, reservoir_clr = optimized_vectorized_reservoir_sampling(
                         remaining_pts, remaining_cls, count, reservoir_pts, reservoir_clr
                     )
             else:
-                count, reservoir_pts, reservoir_clr = vectorized_reservoir_sampling(
+                count, reservoir_pts, reservoir_clr = optimized_vectorized_reservoir_sampling(
                     valid_pts, valid_cls, count, reservoir_pts, reservoir_clr
                 )
         
         save_ply(reservoir_pts, reservoir_clr, output_path)
 
-def vectorized_reservoir_sampling(new_pts, new_cls, current_count, reservoir_pts, reservoir_clr):
+
+### ========= ###
+
+''' The following function is deprecated'''
+
+# def vectorized_reservoir_sampling(new_pts, new_cls, current_count, reservoir_pts, reservoir_clr):
+#     """
+#     - new_pts:  (M, 3)
+#     - new_cls:  (M, 3)
+#     - current_count
+#     - reservoir_pts:  (K, 3)
+#     - reservoir_clr:  (K, 3)
+    
+#     """
+#     k = len(reservoir_pts)
+#     n_new = len(new_pts)
+    
+#     rand_indices = np.random.randint(0, current_count + n_new, size=n_new)
+    
+#     replace_mask = rand_indices < k
+#     replace_indices = rand_indices[replace_mask]
+#     replace_pts = new_pts[replace_mask]
+#     replace_cls = new_cls[replace_mask]
+    
+#     reservoir_pts[replace_indices] = replace_pts
+#     reservoir_clr[replace_indices] = replace_cls
+    
+#     return current_count + n_new, reservoir_pts, reservoir_clr
+
+### ========= ###
+
+
+'''
+    Function `vectorized_reservoir_sampling`  is not mathematically accurate in sampling.
+    This leads to inconsistent density in the downsampled point clouds. 
+    The `optimized_vectorized_reservoir_sampling` function has fixed this bug.
+
+    Special thanks to @Horace89 for the detailed analysis and code assistance.
+
+    See https://github.com/DengKaiCQ/VGGT-Long/issues/28 for details
+'''
+
+def optimized_vectorized_reservoir_sampling(
+    new_points: np.ndarray,
+    new_colors: np.ndarray,
+    current_count: int, 
+    reservoir_points: np.ndarray,
+    reservoir_colors: np.ndarray
+) -> tuple[int, np.ndarray, np.ndarray]:
     """
-    - new_pts:  (M, 3)
-    - new_cls:  (M, 3)
-    - current_count
-    - reservoir_pts:  (K, 3)
-    - reservoir_clr:  (K, 3)
+    Optimized vectorized reservoir sampling with batch probability calculations.
     
+    This maintains mathematical correctness while improving performance through
+    vectorized operations where possible.
+    
+    Args:
+        new_points: New point coordinates to consider, shape (M, 3)
+        new_colors: New point colors to consider, shape (M, 3)
+        current_count: Number of elements seen so far  
+        reservoir_points: Current reservoir of sampled points, shape (K, 3)
+        reservoir_colors: Current reservoir of sampled colors, shape (K, 3)
+        
+    Returns:
+        Tuple of (updated_count, updated_reservoir_points, updated_reservoir_colors)
     """
-    k = len(reservoir_pts)
-    n_new = len(new_pts)
+    random_gen = np.random
+        
+    reservoir_size = len(reservoir_points)
+    num_new_points = len(new_points)
     
-    rand_indices = np.random.randint(0, current_count + n_new, size=n_new)
+    if num_new_points == 0:
+        return current_count, reservoir_points, reservoir_colors
     
-    replace_mask = rand_indices < k
-    replace_indices = rand_indices[replace_mask]
-    replace_pts = new_pts[replace_mask]
-    replace_cls = new_cls[replace_mask]
+    # Calculate sequential indices for each new point
+    point_indices = np.arange(current_count + 1, current_count + num_new_points + 1)
     
-    reservoir_pts[replace_indices] = replace_pts
-    reservoir_clr[replace_indices] = replace_cls
+    # Generate random numbers for each point
+    random_values = random_gen.randint(0, point_indices, size=num_new_points)
     
-    return current_count + n_new, reservoir_pts, reservoir_clr
+    # Determine which points should replace reservoir elements
+    replacement_mask = random_values < reservoir_size
+    replacement_positions = random_values[replacement_mask]
+    
+    # Apply replacements
+    if np.any(replacement_mask):
+        points_to_replace = new_points[replacement_mask]
+        colors_to_replace = new_colors[replacement_mask]
+        
+        reservoir_points[replacement_positions] = points_to_replace
+        reservoir_colors[replacement_positions] = colors_to_replace
+    
+    return current_count + num_new_points, reservoir_points, reservoir_colors
+
+
 
 def write_ply_header(f, num_vertices):
     header = [
@@ -515,7 +586,39 @@ def merge_ply_files(input_dir, output_path):
     print(f"Merge completed! Total points: {total_vertices}")
     print(f"Output file: {output_path}")
 
+def weighted_estimate_se3(source_points, target_points, weights):
+    """
+    source_points:  (Nx3)
+    target_points:  (Nx3)
+    :weights:  (N,) [0,1]
+    """
+    total_weight = np.sum(weights)
+    if total_weight < 1e-6:
+        raise ValueError("Total weight too small for meaningful estimation")
+    
+    normalized_weights = weights / total_weight
 
+    mu_src = np.sum(normalized_weights[:, None] * source_points, axis=0)
+    mu_tgt = np.sum(normalized_weights[:, None] * target_points, axis=0)
+
+    src_centered = source_points - mu_src
+    tgt_centered = target_points - mu_tgt
+
+    weighted_src = src_centered * np.sqrt(normalized_weights)[:, None]
+    weighted_tgt = tgt_centered * np.sqrt(normalized_weights)[:, None]
+    
+    H = weighted_src.T @ weighted_tgt
+
+    U, _, Vt = np.linalg.svd(H)
+    R = Vt.T @ U.T
+    
+    if np.linalg.det(R) < 0:
+        Vt[2, :] *= -1
+        R = Vt.T @ U.T
+
+    t = mu_tgt - R @ mu_src
+    
+    return 1.0, R, t
 
 def weighted_estimate_sim3(source_points, target_points, weights):
     """
@@ -559,13 +662,16 @@ def huber_loss(r, delta):
     abs_r = np.abs(r)
     return np.where(abs_r <= delta, 0.5 * r**2, delta * (abs_r - 0.5 * delta))
 
-def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9):
+def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9, using_sim3 = True):
     """
     src:  (Nx3)
     tgt:  (Nx3)
     init_weights:  (N,)
     """
-    s, R, t = weighted_estimate_sim3(src, tgt, init_weights)
+    if using_sim3:
+        s, R, t = weighted_estimate_sim3(src, tgt, init_weights)
+    else:
+        s, R, t = weighted_estimate_se3(src, tgt, init_weights)
     prev_error = float('inf')
     
     for iter in range(max_iters):
@@ -583,7 +689,10 @@ def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=2
         
         combined_weights /= (np.sum(combined_weights) + 1e-12)
         
-        s_new, R_new, t_new = weighted_estimate_sim3(src, tgt, combined_weights)
+        if using_sim3:
+            s_new, R_new, t_new = weighted_estimate_sim3(src, tgt, init_weights)
+        else:
+            s_new, R_new, t_new = weighted_estimate_se3(src, tgt, init_weights)
 
         param_change = np.abs(s_new - s) + np.linalg.norm(t_new - t)
         rot_angle = np.arccos(min(1.0, max(-1.0, (np.trace(R_new @ R.T) - 1)/2)))
@@ -600,6 +709,32 @@ def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=2
 
 
 # ===== Speed Up Begin =====
+
+@njit(cache=True)
+def _weighted_estimate_se3_numba(source_points, target_points, weights):
+    # Ensure float32
+    source_points = source_points.astype(np.float32)
+    target_points = target_points.astype(np.float32)
+    weights = weights.astype(np.float32)
+
+    total_weight = np.sum(weights)
+    if total_weight < 1e-6:
+        return 1.0, np.zeros(3, dtype=np.float32), np.zeros(3, dtype=np.float32), np.zeros((3, 3), dtype=np.float32)
+
+    normalized_weights = weights / total_weight
+
+    mu_src = np.sum(normalized_weights[:, None] * source_points, axis=0)
+    mu_tgt = np.sum(normalized_weights[:, None] * target_points, axis=0)
+
+    src_centered = source_points - mu_src
+    tgt_centered = target_points - mu_tgt
+
+    weighted_src = src_centered * np.sqrt(normalized_weights)[:, None]
+    weighted_tgt = tgt_centered * np.sqrt(normalized_weights)[:, None]
+
+    H = weighted_src.T @ weighted_tgt
+
+    return 1.0, mu_src, mu_tgt, H
 
 @njit(cache=True)
 def _weighted_estimate_sim3_numba(source_points, target_points, weights):
@@ -631,8 +766,11 @@ def _weighted_estimate_sim3_numba(source_points, target_points, weights):
 
     return s, mu_src, mu_tgt, H
 
-def weighted_estimate_sim3_numba(source_points, target_points, weights):
-    s, mu_src, mu_tgt, H = _weighted_estimate_sim3_numba(source_points, target_points, weights)
+def weighted_estimate_sim3_numba(source_points, target_points, weights, using_sim3 = True):
+    if using_sim3:
+        s, mu_src, mu_tgt, H = _weighted_estimate_sim3_numba(source_points, target_points, weights)
+    else:
+        s, mu_src, mu_tgt, H = _weighted_estimate_se3_numba(source_points, target_points, weights)
 
     if s < 0:
         raise ValueError("Total weight too small for meaningful estimation")
@@ -646,7 +784,11 @@ def weighted_estimate_sim3_numba(source_points, target_points, weights):
         Vt[2, :] *= -1
         R = Vt.T @ U.T
 
-    t = mu_tgt - s * R @ mu_src
+    if using_sim3:
+        t = mu_tgt - s * R @ mu_src
+    else:
+        t = mu_tgt - R @ mu_src
+
     return s, R, t
 
 @njit(cache=True)
@@ -684,12 +826,12 @@ def apply_transformation_numba(src, s, R, t):
         transformed[i] = s * (R @ p) + t
     return transformed
 
-def robust_weighted_estimate_sim3_numba(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9):
+def robust_weighted_estimate_sim3_numba(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9, using_sim3 = True):
     src = src.astype(np.float32)
     tgt = tgt.astype(np.float32)
     init_weights = init_weights.astype(np.float32)
 
-    s, R, t = weighted_estimate_sim3_numba(src, tgt, init_weights)
+    s, R, t = weighted_estimate_sim3_numba(src, tgt, init_weights, using_sim3 = using_sim3)
 
     prev_error = float('inf')
 
@@ -703,7 +845,7 @@ def robust_weighted_estimate_sim3_numba(src, tgt, init_weights, delta=0.1, max_i
         combined_weights = init_weights * huber_weights
         combined_weights /= (np.sum(combined_weights) + 1e-12)
 
-        s_new, R_new, t_new = weighted_estimate_sim3_numba(src, tgt, combined_weights)
+        s_new, R_new, t_new = weighted_estimate_sim3_numba(src, tgt, combined_weights, using_sim3 = using_sim3)
 
         param_change = np.abs(s_new - s) + np.linalg.norm(t_new - t)
         rot_angle = np.arccos(min(1.0, max(-1.0, (np.trace(R_new @ R.T) - 1)/2)))
@@ -737,6 +879,12 @@ def warmup_numba():
         print(" - _weighted_estimate_sim3_numba warmed up.")
     except Exception as e:
         print(" ! Failed to warm up _weighted_estimate_sim3_numba:", e)
+
+    try:
+        _ = _weighted_estimate_se3_numba(src, tgt, weights)
+        print(" - _weighted_estimate_se3_numba warmed up.")
+    except Exception as e:
+        print(" ! Failed to warm up _weighted_estimate_se3_numba:", e)
 
     try:
         _ = huber_loss_numba(residuals, delta)
@@ -812,7 +960,8 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
                                                 all_weights,
                                                 delta=config['Model']['IRLS']['delta'],
                                                 max_iters=config['Model']['IRLS']['max_iters'],
-                                                tol=eval(config['Model']['IRLS']['tol'])
+                                                tol=eval(config['Model']['IRLS']['tol']),
+                                                using_sim3=config['Model']['using_sim3']
                                                 )
     else: # numpy
         s, R, t = robust_weighted_estimate_sim3(all_pts2, 
@@ -820,7 +969,8 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
                                                 all_weights,
                                                 delta=config['Model']['IRLS']['delta'],
                                                 max_iters=config['Model']['IRLS']['max_iters'],
-                                                tol=eval(config['Model']['IRLS']['tol'])
+                                                tol=eval(config['Model']['IRLS']['tol']),
+                                                using_sim3=config['Model']['using_sim3']
                                                 )
 
     mean_error = compute_alignment_error(

@@ -12,6 +12,7 @@ Model:
   useDBoW: False
   delete_temp_files: True
   align_method: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
+  using_sim3: True # Using SIM(3) alignment if True, while using SE(3) alignment if False
 
   IRLS:
     delta: 0.1

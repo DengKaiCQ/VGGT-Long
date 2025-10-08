@@ -195,12 +195,16 @@ cython_debug/
 
 __pycache__/
 __pycache__/*
+**/__pycache__
 .vscode/
 .vscode/*
 .pyc
 
 # vggt-long
-/exps/*
+exps/*
+exps/
+weights/
+weights/*
 *.ckpt
 *.pth
 *.npy
