@@ -1,17 +1,9 @@
 <p align="center">
 <p align="center">
-<h1 align="center">VGGT-Long: Chunk it, Loop it, Align it -- Pushing VGGT's Limits on Kilometer-scale Long RGB Sequences</h1>
+<h1 align="center">VGGT-Long: Chunk it, Loop it, Align it, Pushing VGGT's Limits on Kilometer-scale Long RGB Sequences</h1>
       <strong><h4 align="center"><a href="https://arxiv.org/abs/2507.16443" target="_blank">Paper</a> | <a href="http://xhslink.com/o/7p42O3mRctf" target="_blank">RedNote</a> | <a href="https://www.youtube.com/watch?v=xeRQGerAYOs" target="_blank">YouTube</a></h4></strong>
   </strong>
 </p>
-
-
-https://github.com/user-attachments/assets/1eadd48d-c2b7-4927-a61a-104240121064
-
-https://github.com/user-attachments/assets/9c338fcf-3211-4957-8fb4-1ae1c4833757
-
-https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
-
 
 This repository contains the source code for our work:
 
@@ -19,6 +11,11 @@ This repository contains the source code for our work:
 
 **Abstrat:** Foundation models for 3D vision have recently demonstrated remarkable capabilities in 3D perception. However, extending these models to large-scale RGB stream 3D reconstruction remains challenging due to memory limitations. In this work, we propose **VGGT-Long**, a simple yet effective system that pushes the limits of monocular 3D reconstruction to **kilometer-scale, unbounded outdoor environments**. Our approach addresses the scalability bottlenecks of existing models through a chunk-based processing strategy combined with overlapping alignment and lightweight loop closure optimization. Without requiring camera calibration, depth supervision or model retraining, VGGT-Long achieves trajectory and reconstruction performance comparable to traditional methods. We evaluate our method on KITTI, Waymo, and Virtual KITTI datasets. VGGT-Long not only runs successfully on long RGB sequences where foundation models typically fail, but also produces accurate and consistent geometry across various conditions. Our results highlight the potential of leveraging foundation models for scalable monocular 3D scene in real-world settings, especially for autonomous driving scenarios.
 
+https://github.com/user-attachments/assets/1eadd48d-c2b7-4927-a61a-104240121064
+
+https://github.com/user-attachments/assets/9c338fcf-3211-4957-8fb4-1ae1c4833757
+
+https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 
 ![overview](./assets/overview.png)
 ![method](./assets/method.png)
