@@ -690,9 +690,9 @@ def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=2
         combined_weights /= (np.sum(combined_weights) + 1e-12)
         
         if using_sim3:
-            s_new, R_new, t_new = weighted_estimate_sim3(src, tgt, init_weights)
+            s_new, R_new, t_new = weighted_estimate_sim3(src, tgt, combined_weights)
         else:
-            s_new, R_new, t_new = weighted_estimate_se3(src, tgt, init_weights)
+            s_new, R_new, t_new = weighted_estimate_se3(src, tgt, combined_weights)
 
         param_change = np.abs(s_new - s) + np.linalg.norm(t_new - t)
         rot_angle = np.arccos(min(1.0, max(-1.0, (np.trace(R_new @ R.T) - 1)/2)))
