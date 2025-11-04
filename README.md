@@ -107,6 +107,10 @@ We provide a Python-based Sim3 solver, so `VGGT-Long` can run the loop closure c
 python setup.py install
 ```
 
+We made a simple figure (below) to help you better understanding the Sec 3.2 in paper.
+
+![kitti](./assets/loop_chunk.png)
+
 #### Step 4 (Optional) : Compile `DBoW` Loop-Closure Detection Module
 
 The VPR Model of `DBoW` is for performing VPR Model inference with CPU-only. You can skip this step.
