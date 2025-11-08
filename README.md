@@ -196,6 +196,8 @@ Initially, we intended to run the COLMAP on these scenes to provide you with a v
 
 Download link (~13 GiB): [Google Drive](https://drive.google.com/file/d/1HGiKp94lMh0bpQHHtasFnvZUmzF2d2S1/view?usp=sharing)
 
+COLAMP failed on my machine 🥺. If you succeed in getting it to work on these scenes with COLMAP, please contact me!
+
 There are 4 scenes in the zip file:
 
 ![iphone](./assets/iphone_record.png)
