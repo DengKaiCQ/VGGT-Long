@@ -182,7 +182,7 @@ In long-sequence scenarios, addressing CPU memory and GPU memory limitations has
 
 Our test datasets are all sourced from publicly available autonomous driving datasets, and you can download them according to the official instructions.
 
-**Waymo Open Dataset**: [Main page](https://waymo.com/open/), [V1.4.1](https://console.cloud.google.com/storage/browser/waymo_open_dataset_v_1_4_1)
+**Waymo Open Dataset**: [Main page](https://waymo.com/open/), [V1.4.1](https://console.cloud.google.com/storage/browser/waymo_open_dataset_v_1_4_1). If you encounter any problems on Waymo, you can find the reference code at [#33](https://github.com/DengKaiCQ/VGGT-Long/issues/33) that might be helpful. We have noticed that different people seem to handle this dataset differently.
 
 **Virtual KITTI Dataset** (V1.3.1): [Link](https://europe.naverlabs.com/research/computer-vision/proxy-virtual-worlds-vkitti-1/)
 
