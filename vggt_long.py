@@ -301,7 +301,7 @@ class VGGT_Long:
 
                 self.loop_predict_list.append((item, single_chunk_predictions))
                 print(item)
-            
+        
 
         print(f"Processing {len(self.img_list)} images in {num_chunks} chunks of size {self.chunk_size} with {self.overlap} overlap")
 
@@ -326,12 +326,32 @@ class VGGT_Long:
             conf2 = chunk_data2['world_points_conf'][:self.overlap]
 
             conf_threshold = min(np.median(conf1), np.median(conf2)) * 0.1
+
+            scale_factor = None
+            if self.config['Model']['align_method'] == 'scale+se3':
+
+                chunk1_depth = np.squeeze(chunk_data1['depth'][-self.overlap:])
+                chunk2_depth = np.squeeze(chunk_data2['depth'][:self.overlap])
+                chunk1_depth_conf = np.squeeze(chunk_data1['depth_conf'][-self.overlap:])
+                chunk2_depth_conf = np.squeeze(chunk_data2['depth_conf'][:self.overlap])
+
+                scale_factor_return, quality_score, method_used = precompute_scale_chunks_with_depth(
+                                                                chunk1_depth, 
+                                                                chunk1_depth_conf, 
+                                                                chunk2_depth, 
+                                                                chunk2_depth_conf, 
+                                                                method=self.config['Model']['scale_compute_method']
+                                                            )
+                print(f'[Depth Scale Precompute] scale: {scale_factor_return}, quality_score: {quality_score}, method_used: {method_used}')
+                scale_factor = scale_factor_return
+
             s, R, t = weighted_align_point_maps(point_map1, 
                                                 conf1, 
                                                 point_map2, 
                                                 conf2, 
                                                 conf_threshold=conf_threshold,
-                                                config=self.config)
+                                                config=self.config,
+                                                precompute_scale=scale_factor)
             print("Estimated Scale:", s)
             print("Estimated Rotation:\n", R)
             print("Estimated Translation:", t)
@@ -421,7 +441,7 @@ class VGGT_Long:
             plt.plot(x1, y1, 'o-', label='After Optimization')
             for i, j, _ in self.loop_sim3_list:
                 plt.plot([x0[i], x0[j]], [y0[i], y0[j]], 'r--', alpha=0.25, label='Loop (Before)' if i == 5 else "")
-                plt.plot([x1[i], x1[j]], [y1[i], y1[j]], 'g-', alpha=0.35, label='Loop (After)' if i == 5 else "")
+                plt.plot([x1[i], x1[j]], [y1[i], y1[j]], 'g-', alpha=0.25, label='Loop (After)' if i == 5 else "")
             plt.gca().set_aspect('equal')
             plt.title("Sim3 Loop Closure Optimization")
             plt.xlabel("x")
@@ -674,7 +694,7 @@ if __name__ == '__main__':
         print(f'The exp will be saved under dir: {save_dir}')
         copy_file(args.config, save_dir)
 
-    if config['Model']['align_method'] == 'numba':
+    if config['Model']['align_lib'] == 'numba':
         warmup_numba()
 
     vggt_long = VGGT_Long(image_dir, save_dir, config)

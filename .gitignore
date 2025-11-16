@@ -215,3 +215,4 @@ weights/*
 ORBvoc.txt
 exp.sh
 launch.json
+scripts/exp.sh

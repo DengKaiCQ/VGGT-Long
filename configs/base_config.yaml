@@ -11,13 +11,20 @@ Model:
   loop_enable: True
   useDBoW: False
   delete_temp_files: True
-  align_method: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
-  using_sim3: True # Using SIM(3) alignment if True, while using SE(3) alignment if False
+  align_lib: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
+  align_method: 'sim3' # choose among 'sim3', 'se3' or 'scale+se3'
+  scale_compute_method: 'auto' # choose among 'auto', 'ransac' or 'weighted'. It is used when align_method == 'scale+se3'
+  align_type: 'dense' # choose between 'dense' or 'sparse'. Sparse align is constructing, not avaible for now
+  
   reference_frame_mid: False 
   # If reference_frame_mid == True, use the middle frame within the chunk as the 
   # reference frame to alleviate the scale drift when loop closure is not available.
   # Disable it for now cuz i found some bugs related to this feature [by deng on 09 Oct].
   
+  Sparse_Align:
+    keypoint_select: 'orb' # choose among 'orb', 'fast' or 'disk'
+    keypoint_num: 5000
+
   IRLS:
     delta: 0.1
     max_iters: 5

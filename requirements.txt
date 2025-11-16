@@ -17,3 +17,6 @@ prettytable
 pytorch-lightning
 pytorch-metric-learning
 torchmetrics
+
+opencv-python == 4.8.1
+scikit-learn == 1.6.1
