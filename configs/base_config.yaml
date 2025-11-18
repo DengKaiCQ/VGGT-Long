@@ -12,7 +12,7 @@ Model:
   useDBoW: False
   delete_temp_files: True
   align_lib: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
-  align_method: 'sim3' # choose among 'sim3', 'se3' or 'scale+se3'
+  align_method: 'scale+se3' # choose among 'sim3', 'se3' or 'scale+se3'
   scale_compute_method: 'auto' # choose among 'auto', 'ransac' or 'weighted'. It is used when align_method == 'scale+se3'
   align_type: 'dense' # choose between 'dense' or 'sparse'. Sparse align is constructing, not avaible for now
   

@@ -380,12 +380,33 @@ class VGGT_Long:
                 conf_a = chunk_data_a['world_points_conf'][chunk_a_rela_begin:chunk_a_rela_end]
             
                 conf_threshold = min(np.median(conf_a), np.median(conf_loop)) * 0.1
+
+                scale_factor_a = None
+                if self.config['Model']['align_method'] == 'scale+se3':
+
+                    chunk_a_depth = np.squeeze(chunk_data_a['depth'][chunk_a_rela_begin:chunk_a_rela_end])
+                    chunk_a_depth_conf = np.squeeze(chunk_data_a['depth_conf'][chunk_a_rela_begin:chunk_a_rela_end])
+
+                    chunk_loop_depth = np.squeeze(item[1]['depth'][:chunk_a_range[1] - chunk_a_range[0]])
+                    chunk_loop_depth_conf = np.squeeze(item[1]['depth_conf'][:chunk_a_range[1] - chunk_a_range[0]])
+
+                    scale_factor_return_a, quality_score, method_used = precompute_scale_chunks_with_depth(
+                                                                    chunk_a_depth, 
+                                                                    chunk_a_depth_conf, 
+                                                                    chunk_loop_depth, 
+                                                                    chunk_loop_depth_conf, 
+                                                                    method=self.config['Model']['scale_compute_method']
+                                                                )
+                    print(f'[Depth Scale Precompute] scale: {scale_factor_return}, quality_score: {quality_score}, method_used: {method_used}')
+                    scale_factor_a = scale_factor_return_a
+
                 s_a, R_a, t_a = weighted_align_point_maps(point_map_a, 
                                                           conf_a, 
                                                           point_map_loop, 
                                                           conf_loop, 
                                                           conf_threshold=conf_threshold,
-                                                          config=self.config)
+                                                          config=self.config,
+                                                          precompute_scale=scale_factor_a)
                 print("Estimated Scale:", s_a)
                 print("Estimated Rotation:\n", R_a)
                 print("Estimated Translation:", t_a)
@@ -404,12 +425,33 @@ class VGGT_Long:
                 conf_b = chunk_data_b['world_points_conf'][chunk_b_rela_begin:chunk_b_rela_end]
             
                 conf_threshold = min(np.median(conf_b), np.median(conf_loop)) * 0.1
+
+                scale_factor_b = None
+                if self.config['Model']['align_method'] == 'scale+se3':
+
+                    chunk_b_depth = np.squeeze(chunk_data_b['depth'][chunk_b_rela_begin:chunk_b_rela_end])
+                    chunk_b_depth_conf = np.squeeze(chunk_data_b['depth_conf'][chunk_b_rela_begin:chunk_b_rela_end])
+
+                    chunk_loop_depth = np.squeeze(item[1]['depth'][-chunk_b_range[1] + chunk_b_range[0]:])
+                    chunk_loop_depth_conf = np.squeeze(item[1]['depth_conf'][-chunk_b_range[1] + chunk_b_range[0]:])
+
+                    scale_factor_return_b, quality_score, method_used = precompute_scale_chunks_with_depth(
+                                                                    chunk_b_depth, 
+                                                                    chunk_b_depth_conf, 
+                                                                    chunk_loop_depth, 
+                                                                    chunk_loop_depth_conf, 
+                                                                    method=self.config['Model']['scale_compute_method']
+                                                                )
+                    print(f'[Depth Scale Precompute] scale: {scale_factor_return}, quality_score: {quality_score}, method_used: {method_used}')
+                    scale_factor_b = scale_factor_return_b
+
                 s_b, R_b, t_b = weighted_align_point_maps(point_map_b, 
                                                           conf_b, 
                                                           point_map_loop, 
                                                           conf_loop, 
                                                           conf_threshold=conf_threshold,
-                                                          config=self.config)
+                                                          config=self.config,
+                                                          precompute_scale=scale_factor_b)
                 print("Estimated Scale:", s_b)
                 print("Estimated Rotation:\n", R_b)
                 print("Estimated Translation:", t_b)

@@ -1159,9 +1159,13 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
         point_map1, conf1, 
         point_map2, conf2, 
         conf_threshold, 
-        s, R, t
+        precompute_scale, R, t
     )
     print(f'Mean error: {mean_error}')
+
+    if precompute_scale is not None: # meaning we are using align method 'scale+se3'
+        # we need this precompute_scale for loop align
+        s = precompute_scale
 
     return s, R, t
 
