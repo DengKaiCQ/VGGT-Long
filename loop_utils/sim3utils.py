@@ -1154,18 +1154,17 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
                                                 tol=eval(config['Model']['IRLS']['tol']),
                                                 align_method = config['Model']['align_method']
                                                 )
-
+    if precompute_scale is not None: # meaning we are using align method 'scale+se3'
+        # we need this precompute_scale for loop align
+        s = precompute_scale
+        
     mean_error = compute_alignment_error(
         point_map1, conf1, 
         point_map2, conf2, 
         conf_threshold, 
-        precompute_scale, R, t
+        s, R, t
     )
     print(f'Mean error: {mean_error}')
-
-    if precompute_scale is not None: # meaning we are using align method 'scale+se3'
-        # we need this precompute_scale for loop align
-        s = precompute_scale
 
     return s, R, t
 
