@@ -216,10 +216,18 @@ pip install -r requirements.txt
 You can also find some alternative solutions at this link ([Stackoverflow](https://stackoverflow.com/questions/78200859/how-can-i-install-faiss-gpu)).
 
 
-#### **c. Significant drift occurred in the video we recorded with our own mobile device?**
+#### **c. Module `torch` has no attribute `uint64`.**
+
+Checking [#21](https://github.com/DengKaiCQ/VGGT-Long/issues/21), you could downgrade the library `safetensors` to `0.5.3`.
+
+#### **d. Converting to COLMAP?**
+
+I have spent an enormous amount of time on this, but I still haven't been able to solve it at present. If you have found a solution, please submit a PR. This will be very beneficial for the entire community (I noticed that many similar repos got this problem).
+
+#### **3. Significant drift occurred in the video we recorded with our own mobile device?**
 
 
-This issue is likely caused by either minimal movement in your video or an excessively high frame extraction rate, leading to accumulated drift. We have observed that with very dense input where displacement between consecutive frames is small, the model's drift can increase to noticeable levels. You could try extracting video frames at a lower frame rate, such as `1fps` (this is similar to keyframe processing in Visual SLAM):
+This issue is likely caused by either minimal movement in your video or an excessively high frame rate, leading to accumulated drift. We have observed that with very dense input where movement between consecutive frames is small, the model's drift can increase to noticeable levels. You could try extracting video frames at a lower frame rate, such as `1fps` (this is similar to keyframe processing in Visual SLAM):
 
 ```cmd
 ffmpeg -i your_video.mp4 -vf "fps=1,scale=518:-1" ./extract_images/frame_%06d.png
@@ -227,13 +235,13 @@ ffmpeg -i your_video.mp4 -vf "fps=1,scale=518:-1" ./extract_images/frame_%06d.pn
 
 You may also consider switching to `Pi-Long` / `Map-Long` / `DA3-Long`, as better base models can help mitigate this issue to some extent.
 
-#### **d. Module `torch` has no attribute `uint64`.**
+Please ensure that the videos you record are free from motion blur, as the base model currently handles motion blur with limited stability.  
 
-Checking [#21](https://github.com/DengKaiCQ/VGGT-Long/issues/21), you could downgrade the library `safetensors` to `0.5.3`.
-
-#### **e. Converting to COLMAP?**
-
-I have spent an enormous amount of time on this, but I still haven't been able to solve it at present. If you have found a solution, please submit a PR. This will be very beneficial for the entire community (I noticed that many similar repos got this problem).
+1. You can record at a higher frame rate, such as 60 FPS, as this reduces the exposure time per frame.  
+2. Enhance stability by using a camera stabilizer or enabling the corresponding stabilization feature in the settings.  
+3. Record with a wide-angle lens. In cases of similar camera shake, wide-angle lenses produce relatively less blur due to their larger field of view, which reduces the proportion of relative motion in the image.  
+4. In dark environments, the camera may increase shutter time due to insufficient light, often resulting in more severe motion blur. Therefore, please ensure adequate environmental lighting while recording.  
+5. If you have some photography knowledge, you can use the camera's professional mode to increase the shutter speed while also widening the aperture (decreasing the F-value) and increasing the ISO.
 
 </details>
 
