@@ -1096,6 +1096,9 @@ def precompute_scale_chunks_with_depth(chunk1_depth, chunk1_conf, chunk2_depth, 
 
 # ===== Scale precompute end =====
 
+from loop_utils.alignment_triton import robust_weighted_estimate_sim3_triton
+from loop_utils.alignment_torch import robust_weighted_estimate_sim3_torch
+
 def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_threshold, config, precompute_scale = None):
     """ point_map2 -> point_map1"""
     b1, _, _, _ = point_map1.shape
@@ -1145,7 +1148,7 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
                                                 tol=eval(config['Model']['IRLS']['tol']),
                                                 align_method = config['Model']['align_method']
                                                 )
-    else: # numpy
+    elif config['Model']['align_lib'] == 'numpy': # numpy
         s, R, t = robust_weighted_estimate_sim3(all_pts2, 
                                                 all_pts1, 
                                                 all_weights,
@@ -1154,6 +1157,27 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
                                                 tol=eval(config['Model']['IRLS']['tol']),
                                                 align_method = config['Model']['align_method']
                                                 )
+    elif config['Model']['align_lib'] == 'torch': # torch
+        s, R, t = robust_weighted_estimate_sim3_torch(all_pts2, 
+                                                all_pts1, 
+                                                all_weights,
+                                                delta=config['Model']['IRLS']['delta'],
+                                                max_iters=config['Model']['IRLS']['max_iters'],
+                                                tol=eval(config['Model']['IRLS']['tol']),
+                                                align_method = config['Model']['align_method']
+                                                )
+    elif config['Model']['align_lib'] == 'triton': # triton
+        s, R, t = robust_weighted_estimate_sim3_triton(all_pts2, 
+                                                all_pts1, 
+                                                all_weights,
+                                                delta=config['Model']['IRLS']['delta'],
+                                                max_iters=config['Model']['IRLS']['max_iters'],
+                                                tol=eval(config['Model']['IRLS']['tol']),
+                                                align_method = config['Model']['align_method']
+                                                )
+    else:
+        raise ValueError(f"Unknown align_lib: {config['Model']['align_lib']}")
+    
     if precompute_scale is not None: # meaning we are using align method 'scale+se3'
         # we need this precompute_scale for loop align
         s = precompute_scale

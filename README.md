@@ -25,6 +25,8 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 
 `[TO BE DONE]` We are working on a feature, that is, using sparse points instead of dense points for chunk align. This way, we can achieve a way more faster alignment speed and skip DISK I/O when chunk aligning.
 
+`[24 Nov 2025]` We accelerated the alignment process on GPU using `Triton`, resulting in a significant improvement in algorithm speed. On the `Seq. 08` (4071 frames), the new acceleration method achieved an average alignment speed of `0.009s/iter`, with a total runtime of `9 min 55 sec` (including warm-up, model loading, prediction, alignment, loop closure, disk I/O, and ply result saving). In comparison, the `numba` based method had an average alignment speed of `0.185s/iter` with a total runtime of `23 min 14 sec` (These results were tested on `A100 80 GiB` cluster).
+
 `[16 Nov 2025]` We have updated `Scale+SE(3)` alignment. This alignment first estimates the scale at the depth level using RANSAC, then performs alignment using `SE(3)`. Since `SIM(3)` has relatively high degrees of freedom (7DoF), the scale calculated through alignment is primarily influenced by the estimated `R` and `t`. The `Scale+SE(3)` method reduces the degrees of freedom (1DoF + 6DoF) to achieve better alignment. Thanks to [@haotongl](https://github.com/haotongl) for providing this idea. We will include a complementary experiment in Arxiv v2 to test different alignment methods (including quantitative tests on Pi-Long and DA3-Long).
 
 `[05 Nov 2025]` We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
@@ -70,7 +72,8 @@ System Environment：
 
 ### 📦 2 - Environment Setup 
 
-**Note:** This repository contains a significant amount of `C++` code, but our goal is to make it as out-of-the-box usable as possible for researchers, as many deep learning researchers may not be familiar with `C++` compilation. Currently, the code for `VGGT-Long` can run in a **pure Python environment**, which means you can skip all the `C++` compilation steps in the `README`.
+> [!NOTE]
+> This repository contains a significant amount of `C++` code, but our goal is to make it as out-of-the-box usable as possible for researchers, as many deep learning researchers may not be familiar with `C++` compilation. Currently, the code for `VGGT-Long` can run in a **pure Python environment**, which means you can skip all the `C++` compilation steps in the `README`.
 
 #### Step 1: Dependency Installation
 
@@ -107,7 +110,8 @@ You can skip the next two steps if you would like to run `VGGT-Long` in pure `Py
 
 #### Step 3 (Optional) : Compile Loop-Closure Correction Module
 
-We provide a Python-based Sim3 solver, so `VGGT-Long` can run the loop closure correction solving without compiling `C++` code. However, we still recommend installing the `C++` solver as it is more **stable and faster**.
+> [!NOTE]
+> We provide a Python-based Sim3 solver, so `VGGT-Long` can run the loop closure correction solving without compiling `C++` code. However, we still recommend installing the `C++` solver as it is more **stable and faster**.
 
 ```cmd
 python setup.py install
@@ -170,9 +174,70 @@ mkdir ./extract_images
 ffmpeg -i your_video.mp4 -vf "fps=5,scale=518:-1" ./extract_images/frame_%06d.png
 ```
 
+### 🛠️ 4 - Possible Problems You May Encounter
+
+You may encounter some problems. We have collected some questions and their solutions. If you encounter similar problems, you can refer to them.
+
+<details>
+  <summary><strong>See details</a></strong></summary>
+
+**a. Error about `libGL.so.1`.**
+
+The error comes from `opencv-python`, please run the following cmd to install the system dependencies.
+
+```cmd
+sudo apt-get install -y libgl1-mesa-glx
+```
 
 
-### 🚨 4 - **Important Notice**: Memory Management & Requirements
+**b. Unable to install faiss-gpu (which is used in Loop Closure)**
+
+for example,
+```cmd
+ERROR: Could not find a version that satisfies the requirement faiss-gpu (from versions: none)
+ERROR: No matching distribution found for faiss-gpu
+```
+
+
+To address this issue, you can modify the `requirements.txt` file as follows:
+
+```cmd
+...
+faiss-gpu -> faiss-gpu-cu11 or faiss-gpu-cu12
+...
+```
+
+Then reinstall requirements:
+
+```cmd
+pip install -r requirements.txt
+```
+
+You can also find some alternative solutions at this link ([Stackoverflow](https://stackoverflow.com/questions/78200859/how-can-i-install-faiss-gpu)).
+
+
+**c. Significant drift occurred in the video we recorded with our own mobile device?**
+
+
+This issue is likely caused by either minimal movement in your video or an excessively high frame extraction rate, leading to accumulated drift. We have observed that with very dense input where displacement between consecutive frames is small, the model's drift can increase to noticeable levels. You could try extracting video frames at a lower frame rate, such as `1fps` (this is similar to keyframe processing in Visual SLAM):
+
+```cmd
+ffmpeg -i your_video.mp4 -vf "fps=1,scale=518:-1" ./extract_images/frame_%06d.png
+```
+
+You may also consider switching to `Pi-Long` / `Map-Long` / `DA3-Long`, as better base models can help mitigate this issue to some extent.
+
+**d. Module `torch` has no attribute `uint64`.**
+
+Checking [#21](https://github.com/DengKaiCQ/VGGT-Long/issues/21), you could downgrade the library `safetensors` to `0.5.3`.
+
+**e. Converting to COLMAP?**
+
+I have spent an enormous amount of time on this, but I still haven't been able to solve it at present. If you have found a solution, please submit a PR. This will be very beneficial for the entire community (I noticed that many similar repos got this problem).
+
+</details>
+
+### 🚨 5 - Important Notice: Memory Management & Requirements
 
 In long-sequence scenarios, addressing CPU memory and GPU memory limitations has always been a core challenge. VGGT-Long resolves **GPU** memory limitations encountered by VGGT through chunk-based input partitioning. As for **CPU** memory constraints, we achieve lower CPU memory usage by storing intermediate results on the **disk** (the consequences of CPU memory overflow are far more severe than GPU issues - while GPU OOM may simply terminate the program, **CPU OOM can cause complete system freeze**, which we absolutely want to avoid). VGGT-Long automatically retrieves locally stored intermediate results when needed. Upon completion, these temporary files are **automatically deleted** to prevent excessive disk space consumption. This implementation implies two key considerations:
 
@@ -190,21 +255,7 @@ Our test datasets are all sourced from publicly available autonomous driving dat
 
 **KITTI Dataset Odometry Track**: [Link](https://www.cvlibs.net/datasets/kitti/eval_odometry.php)
 
-## Self-Collected Dataset Used in Demo Video
 
-We have uploaded our self-collected scenes used in the demo video to Google Drive, as we found it might be difficult to find similar complex scenarios, specifically, long sequences in large scene in other datasets. We have extracted rgb frames in png format from the original videos, which you can directly read.
-
-Initially, we intended to run the COLMAP on these scenes to provide you with a visual reference, as there is no GT after the scenes were captured. However, we found that COLMAP seems difficult to optimize in such large-scale scenario. We may update the reconstruction results from COLMAP as a visual reference later once we locate the bugs.
-
-Download link (~13 GiB): [Google Drive](https://drive.google.com/file/d/1HGiKp94lMh0bpQHHtasFnvZUmzF2d2S1/view?usp=sharing)
-
-COLAMP failed on my machine 🥺. If you succeed in getting it to work on these scenes with COLMAP, please contact me!
-
-There are 4 scenes in the zip file:
-
-![iphone](./assets/iphone_record.png)
-
-![game](./assets/game_record.png)
 
 ## Acknowledgements
 
@@ -229,6 +280,22 @@ If you find our work helpful, please consider citing:
 ## License
 
 The `VGGT-Long` codebase follows `VGGT`'s license, please refer to `./LICENSE.txt` for applicable terms. For commercial use, please follow the link [VGGT](https://github.com/facebookresearch/vggt) that should utilize the commercial version of the pre-trained weight. [Link of VGGT-1B-Commercial](https://huggingface.co/facebook/VGGT-1B-Commercial)
+
+## Self-Collected Dataset Used in Demo Video
+
+We have uploaded our self-collected scenes used in the demo video to Google Drive, as we found it might be difficult to find similar complex scenarios, specifically, long sequences in large scene in other datasets. We have extracted rgb frames in png format from the original videos, which you can directly read.
+
+Initially, we intended to run the COLMAP on these scenes to provide you with a visual reference, as there is no GT after the scenes were captured. However, we found that COLMAP seems difficult to optimize in such large-scale scenario. We may update the reconstruction results from COLMAP as a visual reference later once we locate the bugs.
+
+Download link (~13 GiB): [Google Drive](https://drive.google.com/file/d/1HGiKp94lMh0bpQHHtasFnvZUmzF2d2S1/view?usp=sharing)
+
+COLAMP failed on my machine 🥺. If you succeed in getting it to work on these scenes with COLMAP, please contact me!
+
+There are 4 scenes in the zip file:
+
+![iphone](./assets/iphone_record.png)
+
+![game](./assets/game_record.png)
 
 ## More Experiments
 

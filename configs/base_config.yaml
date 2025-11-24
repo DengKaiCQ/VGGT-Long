@@ -11,9 +11,8 @@ Model:
   loop_enable: True
   useDBoW: False
   delete_temp_files: True
-  align_lib: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
+  align_lib: 'triton' # choose among 'triton' (GPU), 'torch' (GPU), 'numba' (CPU) or 'numpy' (CPU)
   align_method: 'sim3' # choose among 'sim3', 'se3' or 'scale+se3'
-  # find bugs related to the 'scale+se3'. we are fixing them, will get done in days. [by Deng]
   scale_compute_method: 'auto' # choose among 'auto', 'ransac' or 'weighted'. It is used when align_method == 'scale+se3'
   align_type: 'dense' # choose between 'dense' or 'sparse'. Sparse align is constructing, not avaible for now
   
