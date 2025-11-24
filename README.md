@@ -224,7 +224,7 @@ Checking [#21](https://github.com/DengKaiCQ/VGGT-Long/issues/21), you could down
 
 I have spent an enormous amount of time on this, but I still haven't been able to solve it at present. If you have found a solution, please submit a PR. This will be very beneficial for the entire community (I noticed that many similar repos got this problem).
 
-#### **3. Significant drift occurred in the video we recorded with our own mobile device?**
+#### **e. Significant drift occurred in the video we recorded with our own mobile device?**
 
 
 This issue is likely caused by either minimal movement in your video or an excessively high frame rate, leading to accumulated drift. We have observed that with very dense input where movement between consecutive frames is small, the model's drift can increase to noticeable levels. You could try extracting video frames at a lower frame rate, such as `1fps` (this is similar to keyframe processing in Visual SLAM):
@@ -237,11 +237,11 @@ You may also consider switching to `Pi-Long` / `Map-Long` / `DA3-Long`, as bette
 
 Please ensure that the videos you record are free from motion blur, as the base model currently handles motion blur with limited stability.  
 
-1. You can record at a higher frame rate, such as 60 FPS, as this reduces the exposure time per frame.  
-2. Enhance stability by using a camera stabilizer or enabling the corresponding stabilization feature in the settings.  
-3. Record with a wide-angle lens. In cases of similar camera shake, wide-angle lenses produce relatively less blur due to their larger field of view, which reduces the proportion of relative motion in the image.  
-4. In dark environments, the camera may increase shutter time due to insufficient light, often resulting in more severe motion blur. Therefore, please ensure adequate environmental lighting while recording.  
-5. If you have some photography knowledge, you can use the camera's professional mode to increase the shutter speed while also widening the aperture (decreasing the F-value) and increasing the ISO.
+- Record at higher frame rates (e.g., 60 FPS) to reduce exposure time per frame
+- Use a camera stabilizer or enable stabilization features
+- Prefer wide-angle lenses, which exhibit less apparent blur from camera shake due to their larger field of view
+- Ensure adequate lighting in dark environments to prevent the camera from increasing shutter time
+- If familiar with photography, use professional mode to increase shutter speed while widening the aperture and increasing ISO
 
 </details>
 
