@@ -738,6 +738,12 @@ if __name__ == '__main__':
 
     if config['Model']['align_lib'] == 'numba':
         warmup_numba()
+    if config['Model']['align_lib'] == 'triton':
+        from loop_utils.alignment_triton import warmup_triton
+        warmup_triton()
+    if config['Model']['align_lib'] == 'torch':
+        from loop_utils.alignment_torch import warmup_torch
+        warmup_torch()
 
     vggt_long = VGGT_Long(image_dir, save_dir, config)
     vggt_long.run()
