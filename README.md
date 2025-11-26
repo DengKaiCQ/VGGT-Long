@@ -33,7 +33,7 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 
 `[TO BE DONE]` We are working on a feature, that is, using sparse points instead of dense points for chunk align. This way, we can achieve a way more faster alignment speed and skip DISK I/O when chunk aligning.
 
-`[26 Nov 2025]` ***(Speed-up)*** The intermediate results can be chosen to be saved in the CPU Memory, which will make it faster. We have tested on Seq 08 (with 4071 images) and the total running time was `7 min 35 sec`, which is about `8.95 fps`. You can enable this feature in `config.yaml`. However, before doing so, please ensure that you have sufficient CPU memory (more than several hundred GiB of CPU memory).
+`[26 Nov 2025]` ***(Speed-up & COLMAP Support)*** 1. The intermediate results can be chosen to be saved in the CPU Memory, which will make it faster. We have tested on Seq 08 (with 4071 images) and the total running time was `7 min 35 sec`, which is about `8.95 fps`. You can enable this feature in `config.yaml`. However, before doing so, please ensure that you have sufficient CPU memory (more than several hundred GiB of CPU memory) 2. `VGGT-Long` now supports the COLMAP format. Special thanks to [@ljjTYJR](https://github.com/ljjTYJR) for the help!
 
 `[24 Nov 2025]` ***(Speed-up)*** We accelerated the alignment process on GPU using `Triton`, resulting in a significant improvement in algorithm speed. On the `Seq. 08` (4071 frames), the new acceleration method achieved an average alignment speed of `0.009s/iter`, with a total runtime of `9 min 55 sec` which is about `6.84 fps` (including warm-up, model loading, prediction, alignment, loop closure, disk I/O, and ply result saving). In comparison, the `numba` based method had an average alignment speed of `0.183s/iter` with a total runtime of `23 min 14 sec`, about `2.92 fps` (These results were tested on `A100 80 GiB` cluster). These updates will be synchronized to Pi-Long and DA3-Long.
 
@@ -232,11 +232,7 @@ This problem still remains unsolved. You may consider proceeding to Step 4 in th
 
 Checking [#21](https://github.com/DengKaiCQ/VGGT-Long/issues/21), you could downgrade the library `safetensors` to `0.5.3`.
 
-#### **d. Converting to COLMAP?**
-
-I have spent an enormous amount of time on this, but I still haven't been able to solve it at present. If you have found a solution, please submit a PR. This will be very beneficial for the entire community (I noticed that many similar repos got this problem).
-
-#### **e. Significant drift occurred in the video we recorded with our own mobile device?**
+#### **d. Significant drift occurred in the video we recorded with our own mobile device?**
 
 
 This issue is likely caused by either minimal movement in your video or an excessively high frame rate, leading to accumulated drift. We have observed that with very dense input where movement between consecutive frames is small, the model's drift can increase to noticeable levels. You could try extracting video frames at a lower frame rate, such as `1fps` (this is similar to keyframe processing in Visual SLAM):
