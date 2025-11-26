@@ -225,7 +225,7 @@ pip install -r requirements.txt
 
 You can also find some alternative solutions at this link ([Stackoverflow](https://stackoverflow.com/questions/78200859/how-can-i-install-faiss-gpu)).
 
-This problem still remains unsolved. You may consider proceeding to Step 4 in the Environment Setup.
+If this problem still remains unsolved. You may consider proceeding to Step 4 in the Environment Setup.
 
 
 #### **c. Module `torch` has no attribute `uint64`.**
