@@ -33,19 +33,19 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 
 `[TO BE DONE]` We are working on a feature, that is, using sparse points instead of dense points for chunk align. This way, we can achieve a way more faster alignment speed and skip DISK I/O when chunk aligning.
 
-`[26 Nov 2025]` ***Speed-up*** The intermediate results can be chosen to be saved in the CPU Memory, which will make it faster. We have tested on Seq 08 (with 4071 images) and the total running time was `7 min 35`, which is about `8.95 fps`. You can enable this feature in `config.yaml`. However, before doing so, please ensure that you have sufficient CPU memory (more than several hundred GiB of CPU memory).
+`[26 Nov 2025]` ***(Speed-up)*** The intermediate results can be chosen to be saved in the CPU Memory, which will make it faster. We have tested on Seq 08 (with 4071 images) and the total running time was `7 min 35`, which is about `8.95 fps`. You can enable this feature in `config.yaml`. However, before doing so, please ensure that you have sufficient CPU memory (more than several hundred GiB of CPU memory).
 
-`[24 Nov 2025]` ***Speed-up*** We accelerated the alignment process on GPU using `Triton`, resulting in a significant improvement in algorithm speed. On the `Seq. 08` (4071 frames), the new acceleration method achieved an average alignment speed of `0.009s/iter`, with a total runtime of `9 min 55 sec` which is about `6.84 fps` (including warm-up, model loading, prediction, alignment, loop closure, disk I/O, and ply result saving). In comparison, the `numba` based method had an average alignment speed of `0.183s/iter` with a total runtime of `23 min 14 sec`, about `2.92 fps` (These results were tested on `A100 80 GiB` cluster). These updates will be synchronized to Pi-Long and DA3-Long.
+`[24 Nov 2025]` ***(Speed-up)*** We accelerated the alignment process on GPU using `Triton`, resulting in a significant improvement in algorithm speed. On the `Seq. 08` (4071 frames), the new acceleration method achieved an average alignment speed of `0.009s/iter`, with a total runtime of `9 min 55 sec` which is about `6.84 fps` (including warm-up, model loading, prediction, alignment, loop closure, disk I/O, and ply result saving). In comparison, the `numba` based method had an average alignment speed of `0.183s/iter` with a total runtime of `23 min 14 sec`, about `2.92 fps` (These results were tested on `A100 80 GiB` cluster). These updates will be synchronized to Pi-Long and DA3-Long.
 
-`[16 Nov 2025]` ***New Alignment*** We have updated `Scale+SE(3)` alignment. This alignment first estimates the scale at the depth level using RANSAC, then performs alignment using `SE(3)`. Since `SIM(3)` has relatively high degrees of freedom (7DoF), the scale calculated through alignment is primarily influenced by the estimated `R` and `t`. The `Scale+SE(3)` method reduces the degrees of freedom (1DoF + 6DoF) to achieve better alignment. Thanks to [@haotongl](https://github.com/haotongl) for providing this idea. We will include a complementary experiment in Arxiv v2 to test different alignment methods (including quantitative tests on Pi-Long and DA3-Long).
+`[16 Nov 2025]` ***(New Alignment)*** We have updated `Scale+SE(3)` alignment. This alignment first estimates the scale at the depth level using RANSAC, then performs alignment using `SE(3)`. Since `SIM(3)` has relatively high degrees of freedom (7DoF), the scale calculated through alignment is primarily influenced by the estimated `R` and `t`. The `Scale+SE(3)` method reduces the degrees of freedom (1DoF + 6DoF) to achieve better alignment. Thanks to [@haotongl](https://github.com/haotongl) for providing this idea. We will include a complementary experiment in Arxiv v2 to test different alignment methods (including quantitative tests on Pi-Long and DA3-Long).
 
-`[05 Nov 2025]` ***Demo Data*** We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
+`[05 Nov 2025]` ***(Demo Data)*** We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
 
-`[08 Oct 2025]` ***New Alignment & Bug Fix*** 1. We have updated the $\text{SE}(3)$ alignment, which you can enable in the `config.yaml` file. Recent developments in 3D models like [MapAnything](https://arxiv.org/abs/2509.13414) now support metric scale. Under such metric scale, using 6-DoF $\text{SE}(3)$ alignment will be more stable than 7-DoF $\text{SIM}(3)$ alignment. If you are using such models, we provide a code reference for $\text{SE}(3)$ alignment. 2. We have fixed a bug in the `vectorized_reservoir_sampling` function in `loop_utils/sim3utils.py`. Special thanks to [@Horace89](https://github.com/Horace89) for the assistance!
+`[08 Oct 2025]` ***(New Alignment & Bug Fix)*** 1. We have updated the $\text{SE}(3)$ alignment, which you can enable in the `config.yaml` file. Recent developments in 3D models like [MapAnything](https://arxiv.org/abs/2509.13414) now support metric scale. Under such metric scale, using 6-DoF $\text{SE}(3)$ alignment will be more stable than 7-DoF $\text{SIM}(3)$ alignment. If you are using such models, we provide a code reference for $\text{SE}(3)$ alignment. 2. We have fixed a bug in the `vectorized_reservoir_sampling` function in `loop_utils/sim3utils.py`. Special thanks to [@Horace89](https://github.com/Horace89) for the assistance!
 
-`[22 Sep 2025]` ***Demo Video*** We uploaded the demo video on [RedNote](http://xhslink.com/o/7p42O3mRctf) (and we also uploaded it on [Youtube](https://www.youtube.com/watch?v=xeRQGerAYOs) later on `06 Oct 2025`). 
+`[22 Sep 2025]` ***(Demo Video)*** We uploaded the demo video on [RedNote](http://xhslink.com/o/7p42O3mRctf) (and we also uploaded it on [Youtube](https://www.youtube.com/watch?v=xeRQGerAYOs) later on `06 Oct 2025`). 
 
-`[04 Sep 2025]` ***Related Project*** We have developed [Pi-Long](https://github.com/DengKaiCQ/Pi-Long) as a complementary project to `Pi3` and `VGGT-Long`. Benefiting from `Pi3`'s outstanding performance, `Pi-Long` performs even better at the kilometer scale. Feel free to check it out.
+`[04 Sep 2025]` ***(Related Project)*** We have developed [Pi-Long](https://github.com/DengKaiCQ/Pi-Long) as a complementary project to `Pi3` and `VGGT-Long`. Benefiting from `Pi3`'s outstanding performance, `Pi-Long` performs even better at the kilometer scale. Feel free to check it out.
 
 `[02 Aug 2025]` Updated the licensing terms of `VGGT-Long` to reflect the upstream dependency license (See [VGGT](https://github.com/facebookresearch/vggt) for the changes). Please see the [License Section](#license) for full details.
 
@@ -225,6 +225,8 @@ pip install -r requirements.txt
 
 You can also find some alternative solutions at this link ([Stackoverflow](https://stackoverflow.com/questions/78200859/how-can-i-install-faiss-gpu)).
 
+This problem still remains unsolved. You may consider proceeding to Step 4 in the Environment Setup.
+
 
 #### **c. Module `torch` has no attribute `uint64`.**
 
@@ -257,11 +259,14 @@ Please ensure that the videos you record are free from motion blur, as the base 
 
 ### 🚨 5 - Important Notice: Memory Management & Requirements
 
-In long-sequence scenarios, addressing CPU memory and GPU memory limitations has always been a core challenge. VGGT-Long resolves **GPU** memory limitations encountered by VGGT through chunk-based input partitioning. As for **CPU** memory constraints, we achieve lower CPU memory usage by storing intermediate results on the **disk** (the consequences of CPU memory overflow are far more severe than GPU issues - while GPU OOM may simply terminate the program, **CPU OOM can cause complete system freeze**, which we absolutely want to avoid). VGGT-Long automatically retrieves locally stored intermediate results when needed. Upon completion, these temporary files are **automatically deleted** to prevent excessive disk space consumption. This implementation implies two key considerations:
+In long-sequence scenarios, addressing CPU memory and GPU memory limitations has always been a core challenge. VGGT-Long resolves **GPU** memory limitations encountered by VGGT through chunk-based input partitioning. As for **CPU** memory constraints, we achieve lower CPU memory usage by storing intermediate results on the **disk** (the consequences of CPU memory overflow are far more severe than GPU issues, while GPU OOM may simply terminate the program, **CPU OOM can cause complete system freeze**, which we absolutely want to avoid). VGGT-Long automatically retrieves locally stored intermediate results when needed. Upon completion, these temporary files are **automatically deleted** to prevent excessive disk space consumption. This implementation implies two key considerations:
 
 1. Before running, **sufficient disk space** must be reserved (approximately 50GiB for 4500-frame KITTI 00 sequences, or ~5GiB for 300-frame short sequences);
 
 2. The actual runtime depends on your **disk I/O speed** and **memory-disk bandwidth**, which may vary significantly across different computer systems.
+
+> [!NOTE]
+> If you have sufficient CPU memory and want to run `VGGT-Long` more quickly, you can set the `Model` `temp_files_location` in the `config.yaml` file to `'cpu_memory'`. But before that, please make sure your machine gets sufficient CPU memory.
 
 ## Datasets
 
