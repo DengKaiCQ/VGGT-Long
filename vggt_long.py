@@ -673,6 +673,7 @@ class VGGT_Long:
                 c2w = np.linalg.inv(w2c)
 
                 transformed_c2w = S @ c2w  # Be aware of the left multiplication!
+                transformed_c2w[:3, :3] /= s  # Normalize rotation
 
                 all_poses[idx] = transformed_c2w
                 all_intrinsics[idx] = chunk_intrinsics[i]
