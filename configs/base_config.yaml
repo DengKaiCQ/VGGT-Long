@@ -45,7 +45,8 @@ Loop:
   SALAD:
     image_size: [336, 336]
     batch_size: 32
-    similarity_threshold: 0.7
+    similarity_threshold: 0.85 # We found that adjusting the threshold from the original 0.7 to 0.85 
+                               # could significantly reduce false matches.
     top_k: 5
     use_nms: True
     nms_threshold: 25
