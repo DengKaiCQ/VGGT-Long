@@ -8,7 +8,7 @@ Model:
   chunk_size: 60
   overlap: 30
   loop_chunk_size: 20 # imgs of loop chunk = 2 * loop_chunk_size
-  loop_enable: False
+  loop_enable: True
   useDBoW: False
   delete_temp_files: True
   temp_files_location: 'disk' # choose between 'disk' or 'cpu_memory'

@@ -4,6 +4,6 @@ Model:
   chunk_size: 75
   overlap: 30
   loop_chunk_size: 20
-  loop_enable: True
+  loop_enable: False
   useDBoW: False
   delete_temp_files: True
