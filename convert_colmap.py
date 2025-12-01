@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 from scipy.spatial.transform import Rotation
 import struct
+from typing import Optional, Tuple
 
 
 def rotmat2qvec(R):
@@ -45,13 +46,44 @@ def read_ply_binary(ply_path):
         return np.array(points), np.array(colors)
 
 
-def main(exp_dir, image_dir, pcd_file=None):
+def scale_intrinsics(fx, fy, cx, cy, width, height, pred_w: Optional[int] = None, pred_h: Optional[int] = None, disable: bool = False):
+    """Minimal helper to scale intrinsics from predicted resolution to image resolution.
+
+    If pred_w/pred_h are None, infer from cx,cy as round(cx*2), round(cy*2).
+    """
+    if disable:
+        return fx, fy, cx, cy, 1.0, 1.0
+
+    if pred_w is None:
+        pred_w = int(round(cx * 2)) if cx > 0 else width
+    if pred_h is None:
+        pred_h = int(round(cy * 2)) if cy > 0 else height
+
+    if pred_w <= 0 or pred_h <= 0 or pred_w > width or pred_h > height:
+        scale_x = 1.0
+        scale_y = 1.0
+    else:
+        scale_x = float(width) / float(pred_w)
+        scale_y = float(height) / float(pred_h)
+
+    fx_s = fx * scale_x
+    fy_s = fy * scale_y
+    cx_s = cx * scale_x
+    cy_s = cy * scale_y
+
+    return fx_s, fy_s, cx_s, cy_s, scale_x, scale_y
+
+
+def main(exp_dir, image_dir, pcd_file=None, no_scale=False, pred_w=None, pred_h=None, verbose=False):
     """Convert VGGT-Long output to COLMAP format.
 
     Args:
         exp_dir: VGGT-Long experiment output directory
         image_dir: Original input image directory
         pcd_file: Optional path to PLY point cloud file to append to points3D.txt
+        no_scale: if True, disable heuristic intrinsics scaling
+        pred_w/pred_h: optional manual prediction resolution overrides
+        verbose: print diagnostic messages
     """
     poses_file = os.path.join(exp_dir, 'camera_poses.txt')
     intrinsics_file = os.path.join(exp_dir, 'intrinsic.txt')
@@ -80,14 +112,25 @@ def main(exp_dir, image_dir, pcd_file=None):
         print(f"Error: Mismatched counts - poses:{len(c2w_poses)}, intrinsics:{len(intrinsics)}, images:{len(image_files)}")
         return
 
-    # Write cameras.txt
+    # Write cameras.txt (with heuristic scaling)
     with open(os.path.join(colmap_dir, 'cameras.txt'), 'w') as f:
         f.write("# Camera list with one line of data per camera:\n")
         f.write("#   CAMERA_ID, MODEL, WIDTH, HEIGHT, PARAMS[]\n")
         for i, (fx, fy, cx, cy) in enumerate(intrinsics):
             with Image.open(os.path.join(image_dir, image_files[i])) as img:
                 width, height = img.size
-            f.write(f"{i+1} PINHOLE {width} {height} {fx} {fy} {cx} {cy}\n")
+
+
+            fx_s, fy_s, cx_s, cy_s, scale_x, scale_y = scale_intrinsics(
+                float(fx), float(fy), float(cx), float(cy), width, height, pred_w=pred_w, pred_h=pred_h, disable=no_scale
+            )
+
+            if verbose and (abs(scale_x - 1.0) > 1e-3 or abs(scale_y - 1.0) > 1e-3):
+                inferred_pw = pred_w if pred_w is not None else int(round(cx * 2))
+                inferred_ph = pred_h if pred_h is not None else int(round(cy * 2))
+                print(f"[convert] camera {i+1}: inferred pred {inferred_pw}x{inferred_ph} -> scale {scale_x:.3f},{scale_y:.3f}; fx {fx:.2f}->{fx_s:.2f}, cx {cx:.1f}->{cx_s:.1f}")
+
+            f.write(f"{i+1} PINHOLE {width} {height} {fx_s} {fy_s} {cx_s} {cy_s}\n")
 
     # Write images.txt
     with open(os.path.join(colmap_dir, 'images.txt'), 'w') as f:
@@ -137,5 +180,9 @@ if __name__ == '__main__':
     parser.add_argument('--exp_dir', required=True, help='VGGT-Long experiment output directory')
     parser.add_argument('--image_dir', required=True, help='Original input image directory')
     parser.add_argument('--pcd_file', default=None, help='Optional PLY point cloud file to append to points3D.txt')
+    parser.add_argument('--no-scale', action='store_true', help='Disable heuristic intrinsics scaling')
+    parser.add_argument('--pred_w', type=int, default=None, help='Override inferred prediction width')
+    parser.add_argument('--pred_h', type=int, default=None, help='Override inferred prediction height')
+    parser.add_argument('--verbose', action='store_true', help='Print diagnostic messages')
     args = parser.parse_args()
-    main(args.exp_dir, args.image_dir, args.pcd_file)
+    main(args.exp_dir, args.image_dir, args.pcd_file, no_scale=args.no_scale, pred_w=args.pred_w, pred_h=args.pred_h, verbose=args.verbose)
