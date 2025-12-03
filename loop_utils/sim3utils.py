@@ -917,7 +917,7 @@ def warmup_numba():
 
 
 
-def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_threshold, config):
+def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, mask, conf_threshold, config):
     """ point_map2 -> point_map1"""
     b1, _, _, _ = point_map1.shape
     b2, _, _, _ = point_map2.shape
@@ -931,6 +931,8 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
         mask1 = conf1[i] > conf_threshold
         mask2 = conf2[i] > conf_threshold
         valid_mask = mask1 & mask2
+        if mask is not None:
+            valid_mask =valid_mask & mask[i].squeeze()
 
         idx = np.where(valid_mask)
         if len(idx[0]) == 0:
