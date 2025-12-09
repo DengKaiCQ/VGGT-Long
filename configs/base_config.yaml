@@ -1,5 +1,8 @@
 Weights:
+  model: 'VGGT' # choose between 'VGGT' or 'Pi3' or 'Mapanything'
   VGGT: './weights/model.pt'
+  Pi3: './weights/Pi3/model.safetensors'
+  Map:  './weights/map_anything'
   DBoW: './weights/ORBvoc.txt'
   SALAD: './weights/dino_salad.ckpt'
   DNIO: './weights/dinov2_vitb14_pretrain.pth'
@@ -12,12 +15,17 @@ Model:
   useDBoW: False
   delete_temp_files: True
   align_method: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
-  using_sim3: True # Using SIM(3) alignment if True, while using SE(3) alignment if False
-  reference_frame_mid: False 
-  # If reference_frame_mid == True, use the middle frame within the chunk as the 
+  using_sim3: True # Using SIM(3) alignment if True, while using SE(3) alignment if False,mapanything need se3
+  reference_frame_mid: False
+  # If reference_frame_mid == True, use the middle frame within the chunk as the
   # reference frame to alleviate the scale drift when loop closure is not available.
   # Disable it for now cuz i found some bugs related to this feature [by deng on 09 Oct].
-  
+
+  calib: True #only mapanything;get k from kitti for input
+  h: 376 # input h
+  w: 1241 #input w
+
+
   IRLS:
     delta: 0.1
     max_iters: 5
@@ -36,14 +44,14 @@ Loop:
   SALAD:
     image_size: [336, 336]
     batch_size: 32
-    similarity_threshold: 0.85 # We found that adjusting the threshold from the original 0.7 to 0.85 
+    similarity_threshold: 0.85 # We found that adjusting the threshold from the original 0.7 to 0.85
                                # could significantly reduce false matches.
     top_k: 5
     use_nms: True
     nms_threshold: 25
 
   SIM3_Optimizer:
-    lang_version: 'cpp' 
+    lang_version: 'cpp'
     # choose between 'cpp' or 'python'. will auto set 'python' if c++ version has not installed
     max_iterations: 30
     lambda_init: 1e-6
