@@ -2,7 +2,7 @@
 <p align="center">
 <h1 align="center">VGGT-Long: Chunk it, Loop it, Align it, Pushing VGGT's Limits on Kilometer-scale Long RGB Sequences</h1>
       <strong><h4 align="center"><a href="https://arxiv.org/abs/2507.16443" target="_blank">Paper</a> | <a href="http://xhslink.com/o/7p42O3mRctf" target="_blank">RedNote</a> | <a href="https://www.youtube.com/watch?v=xeRQGerAYOs" target="_blank">YouTube</a></h4></strong>
-      <h4 align="center"><i>Related Repo</i>:  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">DA3-Long (Coming Soon)</a> | <a href="https://github.com/msilaev/VGGT-Long-Gsplat" target="_blank">VGGT-Long-Gsplat</a> </h4> 
+      <h4 align="center"><i>Related Repo</i>:  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/DengKaiCQ/Pi-Long" target="https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md">DA3-Long</a> | <a href="https://github.com/msilaev/VGGT-Long-Gsplat" target="_blank">VGGT-Long-Gsplat</a> </h4> 
 </p>
 
 
