@@ -170,11 +170,78 @@ mkdir ./extract_images
 ffmpeg -i your_video.mp4 -vf "fps=5,scale=518:-1" ./extract_images/frame_%06d.png
 ```
 
+### 🛠️ 4 - Possible Problems You May Encounter
+
+You may encounter some problems. We have collected some questions and their solutions. If you encounter similar problems, you can refer to them.
+
+<details>
+  <summary><strong>See details</a></strong></summary>
+
+#### **a. Error about `libGL.so.1`.**
+
+The error comes from `opencv-python`, please run the following cmd to install the system dependencies.
+
+```cmd
+sudo apt-get install -y libgl1-mesa-glx
+```
 
 
-### 🚨 4 - **Important Notice**: Memory Management & Requirements
+#### **b. Unable to install faiss-gpu (which is used in Loop Closure)**
 
-In long-sequence scenarios, addressing CPU memory and GPU memory limitations has always been a core challenge. VGGT-Long resolves **GPU** memory limitations encountered by VGGT through chunk-based input partitioning. As for **CPU** memory constraints, we achieve lower CPU memory usage by storing intermediate results on the **disk** (the consequences of CPU memory overflow are far more severe than GPU issues - while GPU OOM may simply terminate the program, **CPU OOM can cause complete system freeze**, which we absolutely want to avoid). VGGT-Long automatically retrieves locally stored intermediate results when needed. Upon completion, these temporary files are **automatically deleted** to prevent excessive disk space consumption. This implementation implies two key considerations:
+for example,
+```cmd
+ERROR: Could not find a version that satisfies the requirement faiss-gpu (from versions: none)
+ERROR: No matching distribution found for faiss-gpu
+```
+
+
+To address this issue, you can modify the `requirements.txt` file as follows:
+
+```cmd
+...
+faiss-gpu -> faiss-gpu-cu11 or faiss-gpu-cu12
+...
+```
+
+Then reinstall requirements:
+
+```cmd
+pip install -r requirements.txt
+```
+
+You can also find some alternative solutions at this link ([Stackoverflow](https://stackoverflow.com/questions/78200859/how-can-i-install-faiss-gpu)).
+
+If this problem still remains unsolved. You may consider proceeding to Step 4 in the Environment Setup.
+
+
+#### **c. Module `torch` has no attribute `uint64`.**
+
+Checking [#21](https://github.com/DengKaiCQ/VGGT-Long/issues/21), you could downgrade the library `safetensors` to `0.5.3`.
+
+#### **d. Significant drift occurred in the video we recorded with our own mobile device?**
+
+
+This issue is likely caused by either minimal movement in your video or an excessively high frame rate, leading to accumulated drift. We have observed that with very dense input where movement between consecutive frames is small, the model's drift can increase to noticeable levels. You could try extracting video frames at a lower frame rate, such as `1fps` (this is similar to keyframe processing in Visual SLAM):
+
+```cmd
+ffmpeg -i your_video.mp4 -vf "fps=1,scale=518:-1" ./extract_images/frame_%06d.png
+```
+
+You may also consider switching to `Pi-Long` / `Map-Long` / `DA3-Long`, as better base models can help mitigate this issue to some extent.
+
+Please ensure that the videos you record are free from motion blur, as the base model currently handles motion blur with limited stability.  
+
+- Record at higher frame rates (e.g., 60 FPS) to reduce exposure time per frame
+- Use a camera stabilizer or enable stabilization features
+- Prefer wide-angle lenses, which exhibit less apparent blur from camera shake due to their larger field of view
+- Ensure adequate lighting in dark environments to prevent the camera from increasing shutter time
+- If familiar with photography, use professional mode to increase shutter speed while widening the aperture and increasing ISO
+
+</details>
+
+### 🚨 5 - Important Notice: Memory Management & Requirements
+
+In long-sequence scenarios, addressing CPU memory and GPU memory limitations has always been a core challenge. VGGT-Long resolves **GPU** memory limitations encountered by VGGT through chunk-based input partitioning. As for **CPU** memory constraints, we achieve lower CPU memory usage by storing intermediate results on the **disk** (the consequences of CPU memory overflow are far more severe than GPU issues, while GPU OOM may simply terminate the program, **CPU OOM can cause complete system freeze**, which we absolutely want to avoid). VGGT-Long automatically retrieves locally stored intermediate results when needed. Upon completion, these temporary files are **automatically deleted** to prevent excessive disk space consumption. This implementation implies two key considerations:
 
 1. Before running, **sufficient disk space** must be reserved (approximately 50GiB for 4500-frame KITTI 00 sequences, or ~5GiB for 300-frame short sequences);
 
