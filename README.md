@@ -2,7 +2,7 @@
 <p align="center">
 <h1 align="center">VGGT-Long: Chunk it, Loop it, Align it, Pushing VGGT's Limits on Kilometer-scale Long RGB Sequences</h1>
       <strong><h4 align="center"><a href="https://arxiv.org/abs/2507.16443" target="_blank">Paper</a> | <a href="http://xhslink.com/o/7p42O3mRctf" target="_blank">RedNote</a> | <a href="https://www.youtube.com/watch?v=xeRQGerAYOs" target="_blank">YouTube</a></h4></strong>
-      <h4 align="center"><i>Related Repo</i>:  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md" target="_blank">DA3-Long</a> | <a href="https://github.com/msilaev/VGGT-Long-Gsplat" target="_blank">VGGT-Long-Gsplat</a> </h4> 
+      <h4 align="center"><i>Related Repo</i>:  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md" target="_blank">DA3-Streaming</a> | <a href="https://github.com/msilaev/VGGT-Long-Gsplat" target="_blank">VGGT-Long-Gsplat</a> </h4> 
 </p>
 
 
@@ -23,12 +23,18 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 ![method](./assets/method.png)
 ![details](./assets/details.png)
 
+
+### **News**
+
+`[11 Dec 2025]` Release the [DA3-Streaming](https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md).
+
+`[04 Sep 2025]` Released the [Pi-Long](https://github.com/DengKaiCQ/Pi-Long).
+
+`[22 Jul 2025]` Arxiv submitted.
+
 ### **Updates**
 
-`[TO BE DONE]` We are working on a feature, that is, using sparse points instead of dense points for chunk align. This way, we can achieve a way more faster alignment speed and skip DISK I/O when chunk aligning.
-
-`[12 Dec 2025]` 1.We refactored the original architecture to support arbitrary foundation models, including VGGT, PI3, and MapAnything.
-Thanks to a more modular design, the system can be easily extended to additional foundation models in the future.   2.Leveraging MapAnything’s multimodal inputs and its ability to predict absolute scale, we achieved the good performance when integrating MapAnything into our framework.But need to use $\text{SE}(3)$ alignment.
+`[12 Dec 2025]` 1.We refactored the original architecture to support arbitrary foundation models, including `VGGT`, `Pi3`, and `MapAnything`. Thanks to a more modular design, the system can be easily extended to additional foundation models in the future. 2.Leveraging `MapAnything`’s multimodal inputs and its ability to predict absolute scale, we achieved the good performance when integrating MapAnything into our framework.But need to use $\text{SE}(3)$ alignment.
 
 `[05 Nov 2025]` We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
 
