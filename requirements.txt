@@ -10,7 +10,7 @@ onnxruntime
 pyparsing
 importlib_metadata
 
-xformers == 0.0.24
+xformers == 0.0.28.post3
 faiss-gpu
 pandas
 prettytable

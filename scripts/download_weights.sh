@@ -23,8 +23,20 @@ echo "Downloading VGGT weights..."
 VGGT_URL="https://huggingface.co/facebook/VGGT-1B/resolve/main/model.pt"
 curl -L "$VGGT_URL" -o "./model.pt"
 
-# you will see 4 files under `./weights` when finished
+
+# Pi3
+echo "Downloading Pi3 weights..."
+huggingface-cli download yyfz233/Pi3 --local-dir ./Pi3 --local-dir-use-symlinks False
+
+# mapanything
+echo "Downloading mapanything weights..."
+huggingface-cli download facebook/map-anything --local-dir ./map_anything --local-dir-use-symlinks False
+
+
+# you will see 6 files under `./weights` when finished
 # - model.pt
-# - dino_salad.ckpt             
-# - dinov2_vitb14_pretrain.pth  
+# - dino_salad.ckpt
+# - dinov2_vitb14_pretrain.pth
 # - ORBvoc.txt
+# - Pi3
+# - map_anything

@@ -27,6 +27,9 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 
 `[TO BE DONE]` We are working on a feature, that is, using sparse points instead of dense points for chunk align. This way, we can achieve a way more faster alignment speed and skip DISK I/O when chunk aligning.
 
+`[12 Dec 2025]` 1.We refactored the original architecture to support arbitrary foundation models, including VGGT, PI3, and MapAnything.
+Thanks to a more modular design, the system can be easily extended to additional foundation models in the future.   2.Leveraging MapAnything’s multimodal inputs and its ability to predict absolute scale, we achieved the good performance when integrating MapAnything into our framework.But need to use $\text{SE}(3)$ alignment.
+
 `[05 Nov 2025]` We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
 
 `[08 Oct 2025]` 1. We have updated the $\text{SE}(3)$ alignment, which you can enable in the `config.yaml` file. Recent developments in 3D models like [MapAnything](https://arxiv.org/abs/2509.13414) now support metric scale. Under such metric scale, using 6-DoF $\text{SE}(3)$ alignment will be more stable than 7-DoF $\text{SIM}(3)$ alignment. If you are using such models, we provide a code reference for $\text{SE}(3)$ alignment. 2. We have fixed a bug in the `vectorized_reservoir_sampling` function in `loop_utils/sim3utils.py`. Special thanks to [@Horace89](https://github.com/Horace89) for the assistance!
@@ -85,8 +88,8 @@ conda activate vggt-long
 Next, install `PyTorch`,
 
 ```cmd
-pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
-# Verified to work with CUDA 11.8 and torch 2.2.0
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu118
+# Verified to work with CUDA 11.8 and torch 2.5.1
 ```
 
 Install other requirements,
@@ -97,7 +100,7 @@ pip install -r requirements.txt
 
 #### Step 2: Weights Download
 
-Download all the pre-trained weights needed:
+Download all the pre-trained weights needed(Download weights for VGGT, Pi3, and MapAnything by default.):
 
 ```cmd
 bash ./scripts/download_weights.sh
@@ -150,6 +153,8 @@ pip install ./DPRetrieval
 
 </details>
 
+#### Step 5 (Optional) : Install mapanything as a package into the  vggt-long environment,if you want to use mapanything.[Link](https://github.com/facebookresearch/map-anything?tab=readme-ov-file#installation)
+
 ### 🚀 3 - Running the code
 
 
@@ -162,6 +167,8 @@ You can modify the parameters in the `configs/base_config.yaml` file. If you hav
 ```cmd
 python vggt_long.py --image_dir ./path_of_images --config ./configs/base_config.yaml
 ```
+
+You can change the 'model' in config to use a different foundation model.
 
 You may run the following cmd if you got videos before `python vggt_long.py`.
 
