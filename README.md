@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 
 ### **Updates**
 
-`[12 Dec 2025]` 1.We refactored the original architecture to support arbitrary foundation models, including `VGGT`, `Pi3`, and `MapAnything`. The pipeline can be easily extended to additional foundation models in the future. 2.Leveraging `MapAnything`'s multimodal inputs and its ability to predict metric/real scale, `Map-Long` achieved a great performance in the setting of metric scale with $\text{SE}(3)$ alignment.
+`[12 Dec 2025]` 1. We refactored the original architecture to support arbitrary foundation models, including `VGGT`, `Pi3`, and `MapAnything`. The current pipeline can be extended to future 3D foundation models easily. 2. Leveraging `MapAnything`'s multimodal inputs and its ability to predict metric/real scale, `Map-Long` achieved a great performance in the setting of metric scale with $\text{SE}(3)$ alignment.
 
 `[05 Nov 2025]` We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
 
