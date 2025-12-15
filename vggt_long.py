@@ -7,10 +7,11 @@ import threading
 import torch
 from tqdm.auto import tqdm
 import cv2
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 import gc
 import sys
-
+import json
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 base_models_path = os.path.join(current_dir, 'base_models')
@@ -25,7 +26,7 @@ except ImportError:
 from LoopModels.LoopModel import LoopDetector
 from LoopModelDBoW.retrieval.retrieval_dbow import RetrievalDBOW
 
-from base_models.base_model import VGGTAdapter,Pi3Adapter
+from base_models.base_model import VGGTAdapter,Pi3Adapter,MapAnythingAdapter,DA3Adapter
 
 import numpy as np
 
@@ -41,7 +42,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from loop_utils.config_utils import load_config
-
+from pathlib import Path
 
 def remove_duplicates(data_list):
     """
@@ -62,6 +63,24 @@ def remove_duplicates(data_list):
 
     return result
 
+def extract_p2_k_matrix(calib_path):
+    """from calib.txt get K  (kitti)"""
+
+    calib_path = Path(calib_path)
+    if not calib_path.exists():
+        raise FileNotFoundError(f"Calibration file not found: {calib_path}")
+
+    with open(calib_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('P2:'):
+                values = line.split(':')[1].split()
+                values = [float(v) for v in values]
+                p2_matrix = np.array(values).reshape(3, 4)
+                k_matrix = p2_matrix[:3, :3]
+                return k_matrix, p2_matrix
+
+    raise ValueError("P2 not found in calibration file")
 
 class LongSeqResult:
     def __init__(self):
@@ -116,6 +135,10 @@ class VGGT_Long:
             self.model = VGGTAdapter(self.config)
         elif self.config['Weights']['model']=='Pi3':
             self.model = Pi3Adapter(self.config)
+        elif self.config['Weights']['model'] == 'Mapanything':
+            self.model = MapAnythingAdapter(self.config)
+        elif self.config['Weights']['model'] == 'DA3':
+            self.model = DA3Adapter(self.config)
         else:
             raise ValueError(f"Unsupported model: {self.config['Weights']['model']}. ")
 
@@ -301,6 +324,13 @@ class VGGT_Long:
             conf1 = chunk_data1['world_points_conf'][-self.overlap:]
             conf2 = chunk_data2['world_points_conf'][:self.overlap]
 
+            mask = None
+            if chunk_data1["mask"] is not None:
+                mask1 = chunk_data1["mask"][-self.overlap:]
+                mask2 = chunk_data2["mask"][:self.overlap]
+
+                mask = mask1.squeeze() & mask2.squeeze()
+
             conf_threshold = min(np.median(conf1), np.median(conf2)) * 0.1
 
             scale_factor = None
@@ -315,6 +345,7 @@ class VGGT_Long:
                     chunk1_depth_conf,
                     chunk2_depth,
                     chunk2_depth_conf,
+                    mask,
                     method=self.config['Model']['scale_compute_method']
                 )
                 print(
@@ -325,6 +356,7 @@ class VGGT_Long:
                                                 conf1,
                                                 point_map2,
                                                 conf2,
+                                                mask,
                                                 conf_threshold=conf_threshold,
                                                 config=self.config,
                                                 precompute_scale=scale_factor)
@@ -361,6 +393,14 @@ class VGGT_Long:
 
                 conf_threshold = min(np.median(conf_a), np.median(conf_loop)) * 0.1
 
+                mask = None
+                if item[1]['mask'] is not None:
+                    mask_loop = item[1]['mask'][:chunk_a_range[1] - chunk_a_range[0]]
+                    mask_a = chunk_data_a['mask'][chunk_a_rela_begin:chunk_a_rela_end]
+
+                    mask = mask_loop.squeeze() & mask_a.squeeze()
+
+
                 scale_factor_a = None
                 if self.config['Model']['align_method'] == 'scale+se3':
                     chunk_a_depth = np.squeeze(chunk_data_a['depth'][chunk_a_rela_begin:chunk_a_rela_end])
@@ -374,6 +414,7 @@ class VGGT_Long:
                         chunk_a_depth_conf,
                         chunk_loop_depth,
                         chunk_loop_depth_conf,
+                        mask,
                         method=self.config['Model']['scale_compute_method']
                     )
                     print(
@@ -384,6 +425,7 @@ class VGGT_Long:
                                                           conf_a,
                                                           point_map_loop,
                                                           conf_loop,
+                                                          mask,
                                                           conf_threshold=conf_threshold,
                                                           config=self.config,
                                                           precompute_scale=scale_factor_a)
@@ -411,6 +453,15 @@ class VGGT_Long:
 
                 conf_threshold = min(np.median(conf_b), np.median(conf_loop)) * 0.1
 
+
+
+                mask = None
+                if  item[1]['mask'] is not None:
+                    mask_loop = item[1]['mask'][-chunk_b_range[1] + chunk_b_range[0]:]
+                    mask_b = chunk_data_b['mask'][chunk_b_rela_begin:chunk_b_rela_end]
+
+                    mask = mask_loop.squeeze() &  mask_b.squeeze()
+
                 scale_factor_b = None
                 if self.config['Model']['align_method'] == 'scale+se3':
                     chunk_b_depth = np.squeeze(chunk_data_b['depth'][chunk_b_rela_begin:chunk_b_rela_end])
@@ -424,6 +475,7 @@ class VGGT_Long:
                         chunk_b_depth_conf,
                         chunk_loop_depth,
                         chunk_loop_depth_conf,
+                        mask,
                         method=self.config['Model']['scale_compute_method']
                     )
                     print(
@@ -434,6 +486,7 @@ class VGGT_Long:
                                                           conf_b,
                                                           point_map_loop,
                                                           conf_loop,
+                                                          mask,
                                                           conf_threshold=conf_threshold,
                                                           config=self.config,
                                                           precompute_scale=scale_factor_b)
@@ -568,6 +621,11 @@ class VGGT_Long:
         torch.cuda.empty_cache()
         print('Loading model...')
         self.model.load()
+
+        if self.config['Model']['calib']:
+            calib_path = Path(self.img_dir).parent / 'calib.txt'
+            k, p2_matrix = extract_p2_k_matrix(calib_path)
+            self.model.k = k
 
 
         self.process_long_sequence()

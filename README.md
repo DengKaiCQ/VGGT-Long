@@ -1,9 +1,11 @@
 <p align="center">
 <p align="center">
 <h1 align="center">VGGT-Long: Chunk it, Loop it, Align it, Pushing VGGT's Limits on Kilometer-scale Long RGB Sequences</h1>
-      <strong><h4 align="center"><i>Paper & Video: </i><a href="https://arxiv.org/abs/2507.16443" target="_blank">Paper</a> | <a href="http://xhslink.com/o/7p42O3mRctf" target="_blank">RedNote</a> | <a href="https://www.youtube.com/watch?v=xeRQGerAYOs" target="_blank">YouTube</a></h4></strong>
-      <h4 align="center"><i>Related Repo:</i>  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">DA3-Long (Coming Soon)</a> </h4>
+      <strong><h4 align="center"><a href="https://arxiv.org/abs/2507.16443" target="_blank">Paper</a> | <a href="http://xhslink.com/o/7p42O3mRctf" target="_blank">RedNote</a> | <a href="https://www.youtube.com/watch?v=xeRQGerAYOs" target="_blank">YouTube</a></h4></strong>
+      <h4 align="center"><i>Related Repo</i>:  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md" target="_blank">DA3-Streaming</a> | <a href="https://github.com/msilaev/VGGT-Long-Gsplat" target="_blank">VGGT-Long-Gsplat</a> </h4> 
 </p>
+
+
 
 This repository contains the source code for our work:
 
@@ -21,31 +23,28 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 ![method](./assets/method.png)
 ![details](./assets/details.png)
 
+
 ### **News**
 
-`[TO BE DONE]` We are working on the DA3-Long.
+`[11 Dec 2025]` Released the [DA3-Streaming](https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md).
 
-`[04 Sep 2025]` Released [Pi-Long](https://github.com/DengKaiCQ/Pi-Long).
+`[04 Sep 2025]` Released the [Pi-Long](https://github.com/DengKaiCQ/Pi-Long).
 
 `[22 Jul 2025]` Arxiv submitted.
 
 ### **Updates**
 
-`[TO BE DONE]` We are working on a feature, that is, using sparse points instead of dense points for chunk align. This way, we can achieve a way more faster alignment speed and skip DISK I/O when chunk aligning.
+`[15 Dec 2025]` We adapt DA3-Streaming to the current architecture to enable DA3 and achieve excellent performance.
 
-`[26 Nov 2025]` ***(Speed-up, COLMAP Support & Bug Fix)*** 1. The intermediate results can be chosen to be saved in the CPU Memory, which will make it faster. We have tested on Seq 08 (with 4071 images) and the total running time was `7 min 35 sec`, which is about `8.95 fps`. You can enable this feature in `config.yaml`. However, before doing so, please ensure that you have sufficient CPU memory (more than several hundred GiB of CPU memory) 2. `VGGT-Long` now supports the COLMAP format. Special thanks to [@ljjTYJR](https://github.com/ljjTYJR) for the help! 3. Fixed some known bugs.
+`[12 Dec 2025]` 1. We refactored the original architecture to support arbitrary foundation models, including `VGGT`, `Pi3`, and `MapAnything`. The current pipeline can be extended to future 3D foundation models easily. 2. Leveraging `MapAnything`'s multimodal inputs and its ability to predict metric/real scale, `Map-Long` achieved a great performance in the setting of metric scale with $\text{SE}(3)$ alignment.
 
-`[24 Nov 2025]` ***(Speed-up)*** We accelerated the alignment process on GPU using `Triton`, resulting in a significant improvement in algorithm speed. On the `Seq. 08` (4071 frames), the new acceleration method achieved an average alignment speed of `0.009s/iter`, with a total runtime of `9 min 55 sec` which is about `6.84 fps` (including warm-up, model loading, prediction, alignment, loop closure, disk I/O, and ply result saving). In comparison, the `numba` based method had an average alignment speed of `0.183s/iter` with a total runtime of `23 min 14 sec`, about `2.92 fps` (These results were tested on `A100 80 GiB` cluster). These updates will be synchronized to Pi-Long and DA3-Long.
+`[05 Nov 2025]` We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
 
-`[16 Nov 2025]` ***(New Alignment)*** We have updated `Scale+SE(3)` alignment. This alignment first estimates the scale at the depth level using RANSAC, then performs alignment using `SE(3)`. Since `SIM(3)` has relatively high degrees of freedom (7DoF), the scale calculated through alignment is primarily influenced by the estimated `R` and `t`. The `Scale+SE(3)` method reduces the degrees of freedom (1DoF + 6DoF) to achieve better alignment. Thanks to [@haotongl](https://github.com/haotongl) for providing this idea. We will include a complementary experiment in Arxiv v2 to test different alignment methods (including quantitative tests on Pi-Long and DA3-Long).
+`[08 Oct 2025]` 1. We have updated the $\text{SE}(3)$ alignment, which you can enable in the `config.yaml` file. Recent developments in 3D models like [MapAnything](https://arxiv.org/abs/2509.13414) now support metric scale. Under such metric scale, using 6-DoF $\text{SE}(3)$ alignment will be more stable than 7-DoF $\text{SIM}(3)$ alignment. If you are using such models, we provide a code reference for $\text{SE}(3)$ alignment. 2. We have fixed a bug in the `vectorized_reservoir_sampling` function in `loop_utils/sim3utils.py`. Special thanks to [@Horace89](https://github.com/Horace89) for the assistance!
 
-`[05 Nov 2025]` ***(Demo Data)*** We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
+`[22 Sep 2025]` We uploaded the demo video on [RedNote](http://xhslink.com/o/7p42O3mRctf) (and we also uploaded it on [Youtube](https://www.youtube.com/watch?v=xeRQGerAYOs) later on `06 Oct 2025`). 
 
-`[08 Oct 2025]` ***(New Alignment & Bug Fix)*** 1. We have updated the $\text{SE}(3)$ alignment, which you can enable in the `config.yaml` file. Recent developments in 3D models like [MapAnything](https://arxiv.org/abs/2509.13414) now support metric scale. Under such metric scale, using 6-DoF $\text{SE}(3)$ alignment will be more stable than 7-DoF $\text{SIM}(3)$ alignment. If you are using such models, we provide a code reference for $\text{SE}(3)$ alignment. 2. We have fixed a bug in the `vectorized_reservoir_sampling` function in `loop_utils/sim3utils.py`. Special thanks to [@Horace89](https://github.com/Horace89) for the assistance!
-
-`[22 Sep 2025]` ***(Demo Video)*** We uploaded the demo video on [RedNote](http://xhslink.com/o/7p42O3mRctf) (and we also uploaded it on [Youtube](https://www.youtube.com/watch?v=xeRQGerAYOs) later on `06 Oct 2025`). 
-
-`[04 Sep 2025]` ***(Related Project)*** We have developed [Pi-Long](https://github.com/DengKaiCQ/Pi-Long) as a complementary project to `Pi3` and `VGGT-Long`. Benefiting from `Pi3`'s outstanding performance, `Pi-Long` performs even better at the kilometer scale. Feel free to check it out.
+`[04 Sep 2025]` We have developed [Pi-Long](https://github.com/DengKaiCQ/Pi-Long) as a complementary project to `Pi3` and `VGGT-Long`. Benefiting from `Pi3`'s outstanding performance, `Pi-Long` performs even better at the kilometer scale. Feel free to check it out.
 
 `[02 Aug 2025]` Updated the licensing terms of `VGGT-Long` to reflect the upstream dependency license (See [VGGT](https://github.com/facebookresearch/vggt) for the changes). Please see the [License Section](#license) for full details.
 
@@ -82,8 +81,7 @@ System Environment：
 
 ### 📦 2 - Environment Setup 
 
-> [!NOTE]
-> This repository contains a significant amount of `C++` code, but our goal is to make it as out-of-the-box usable as possible for researchers, as many deep learning researchers may not be familiar with `C++` compilation. Currently, the code for `VGGT-Long` can run in a **pure Python environment**, which means you can skip all the `C++` compilation steps in the `README`.
+**Note:** This repository contains a significant amount of `C++` code, but our goal is to make it as out-of-the-box usable as possible for researchers, as many deep learning researchers may not be familiar with `C++` compilation. Currently, the code for `VGGT-Long` can run in a **pure Python environment**, which means you can skip all the `C++` compilation steps in the `README`.
 
 #### Step 1: Dependency Installation
 
@@ -98,8 +96,8 @@ conda activate vggt-long
 Next, install `PyTorch`,
 
 ```cmd
-pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
-# Verified to work with CUDA 11.8 and torch 2.2.0
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu118
+# Verified to work with CUDA 11.8 and torch 2.5.1
 ```
 
 Install other requirements,
@@ -110,7 +108,7 @@ pip install -r requirements.txt
 
 #### Step 2: Weights Download
 
-Download all the pre-trained weights needed:
+Download all the pre-trained weights needed(Download weights for VGGT, Pi3,MapAnything and DA3 by default.):
 
 ```cmd
 bash ./scripts/download_weights.sh
@@ -120,8 +118,7 @@ You can skip the next two steps if you would like to run `VGGT-Long` in pure `Py
 
 #### Step 3 (Optional) : Compile Loop-Closure Correction Module
 
-> [!NOTE]
-> We provide a Python-based Sim3 solver, so `VGGT-Long` can run the loop closure correction solving without compiling `C++` code. However, we still recommend installing the `C++` solver as it is more **stable and faster**.
+We provide a Python-based Sim3 solver, so `VGGT-Long` can run the loop closure correction solving without compiling `C++` code. However, we still recommend installing the `C++` solver as it is more **stable and faster**.
 
 ```cmd
 python setup.py install
@@ -164,6 +161,8 @@ pip install ./DPRetrieval
 
 </details>
 
+#### Step 5 (Optional) : Install mapanything and DA3 as a package into the  vggt-long environment,if you want to use mapanything and DA3.  (map anything[Link](https://github.com/facebookresearch/map-anything?tab=readme-ov-file#installation)/DA3[Link](https://github.com/ByteDance-Seed/Depth-Anything-3?tab=readme-ov-file#-installation))
+
 ### 🚀 3 - Running the code
 
 
@@ -176,6 +175,8 @@ You can modify the parameters in the `configs/base_config.yaml` file. If you hav
 ```cmd
 python vggt_long.py --image_dir ./path_of_images --config ./configs/base_config.yaml
 ```
+
+You can change the 'model' in config to use a different foundation model.
 
 You may run the following cmd if you got videos before `python vggt_long.py`.
 
@@ -261,9 +262,6 @@ In long-sequence scenarios, addressing CPU memory and GPU memory limitations has
 
 2. The actual runtime depends on your **disk I/O speed** and **memory-disk bandwidth**, which may vary significantly across different computer systems.
 
-> [!NOTE]
-> If you have sufficient CPU memory and want to run `VGGT-Long` more quickly, you can set the `Model` `temp_files_location` in the `config.yaml` file to `'cpu_memory'`. But before that, please make sure that your machine gets sufficient CPU memory.
-
 ## Datasets
 
 Our test datasets are all sourced from publicly available autonomous driving datasets, and you can download them according to the official instructions.
@@ -274,7 +272,21 @@ Our test datasets are all sourced from publicly available autonomous driving dat
 
 **KITTI Dataset Odometry Track**: [Link](https://www.cvlibs.net/datasets/kitti/eval_odometry.php)
 
+## Self-Collected Dataset Used in Demo Video
 
+We have uploaded our self-collected scenes used in the demo video to Google Drive, as we found it might be difficult to find similar complex scenarios, specifically, long sequences in large scene in other datasets. We have extracted rgb frames in png format from the original videos, which you can directly read.
+
+Initially, we intended to run the COLMAP on these scenes to provide you with a visual reference, as there is no GT after the scenes were captured. However, we found that COLMAP seems difficult to optimize in such large-scale scenario. We may update the reconstruction results from COLMAP as a visual reference later once we locate the bugs.
+
+Download link (~13 GiB): [Google Drive](https://drive.google.com/file/d/1HGiKp94lMh0bpQHHtasFnvZUmzF2d2S1/view?usp=sharing)
+
+COLAMP failed on my machine 🥺. If you succeed in getting it to work on these scenes with COLMAP, please contact me!
+
+There are 4 scenes in the zip file:
+
+![iphone](./assets/iphone_record.png)
+
+![game](./assets/game_record.png)
 
 ## Acknowledgements
 
@@ -299,22 +311,6 @@ If you find our work helpful, please consider citing:
 ## License
 
 The `VGGT-Long` codebase follows `VGGT`'s license, please refer to `./LICENSE.txt` for applicable terms. For commercial use, please follow the link [VGGT](https://github.com/facebookresearch/vggt) that should utilize the commercial version of the pre-trained weight. [Link of VGGT-1B-Commercial](https://huggingface.co/facebook/VGGT-1B-Commercial)
-
-## Self-Collected Dataset Used in Demo Video
-
-We have uploaded our self-collected scenes used in the demo video to Google Drive, as we found it might be difficult to find similar complex scenarios, specifically, long sequences in large scene in other datasets. We have extracted rgb frames in png format from the original videos, which you can directly read.
-
-Initially, we intended to run the COLMAP on these scenes to provide you with a visual reference, as there is no GT after the scenes were captured. However, we found that COLMAP seems difficult to optimize in such large-scale scenario. We may update the reconstruction results from COLMAP as a visual reference later once we locate the bugs.
-
-Download link (~13 GiB): [Google Drive](https://drive.google.com/file/d/1HGiKp94lMh0bpQHHtasFnvZUmzF2d2S1/view?usp=sharing)
-
-COLAMP failed on my machine 🥺. If you succeed in getting it to work on these scenes with COLMAP, please contact me!
-
-There are 4 scenes in the zip file:
-
-![iphone](./assets/iphone_record.png)
-
-![game](./assets/game_record.png)
 
 ## More Experiments
 

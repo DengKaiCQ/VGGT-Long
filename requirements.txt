@@ -2,7 +2,7 @@ numpy==1.26.1
 Pillow
 huggingface_hub
 einops
-safetensors==0.5.3
+safetensors
 
 numba==0.61.2
 
@@ -10,14 +10,10 @@ onnxruntime
 pyparsing
 importlib_metadata
 
-xformers==0.0.24
+xformers == 0.0.28.post3
 faiss-gpu
 pandas
 prettytable
 pytorch-lightning
 pytorch-metric-learning
 torchmetrics
-pypose
-
-opencv-python
-scikit-learn==1.6.1

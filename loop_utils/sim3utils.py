@@ -920,67 +920,81 @@ def warmup_numba():
 from sklearn.linear_model import RANSACRegressor
 from sklearn.linear_model import LinearRegression
 
-def compute_scale_ransac(depth1, depth2, conf1, conf2, conf_threshold_ratio=0.1, max_samples=10000):
+def compute_scale_ransac(
+    depth1, depth2, conf1, conf2,mask, conf_threshold_ratio=0.1, max_samples=10000
+):
     """
     Args:
         depth1: (n1, h, w)
         depth2: (n2, h, w)
         conf1: (n1, h, w)
         conf2: (n2, h, w)
-        
+
     """
 
     depth1_flat = depth1.reshape(-1)
     depth2_flat = depth2.reshape(-1)
     conf1_flat = conf1.reshape(-1)
     conf2_flat = conf2.reshape(-1)
-    
-    conf_threshold = max(np.median(conf1_flat) * conf_threshold_ratio, 
-                        np.median(conf2_flat) * conf_threshold_ratio,
-                        1e-6)
-    
-    valid_mask = (conf1_flat > conf_threshold) & (conf2_flat > conf_threshold) & \
-                 (depth1_flat > 1e-3) & (depth2_flat > 1e-3) & \
-                 (depth1_flat < 100) & (depth2_flat < 100)
-    
+
+    conf_threshold = max(
+        np.median(conf1_flat) * conf_threshold_ratio,
+        np.median(conf2_flat) * conf_threshold_ratio,
+        1e-6,
+    )
+
+    valid_mask = (
+        (conf1_flat > conf_threshold)
+        & (conf2_flat > conf_threshold)
+        & (depth1_flat > 1e-3)
+        & (depth2_flat > 1e-3)
+        & (depth1_flat < 100)
+        & (depth2_flat < 100)
+    )
+
+    if mask is not None:
+        mask = mask.reshape(-1)
+        valid_mask = valid_mask & mask
+
     if np.sum(valid_mask) < 100:
         print(f"Warning: Only {np.sum(valid_mask)} valid points, using default scale 1.0")
         return 1.0, 0.0
-    
+
     valid_depth1 = depth1_flat[valid_mask]
     valid_depth2 = depth2_flat[valid_mask]
-    
+
     if len(valid_depth1) > max_samples:
         indices = np.random.choice(len(valid_depth1), max_samples, replace=False)
         valid_depth1 = valid_depth1[indices]
         valid_depth2 = valid_depth2[indices]
-    
+
     X = valid_depth2.reshape(-1, 1)
     y = valid_depth1
-    
+
     base_estimator = LinearRegression(fit_intercept=False)
     ransac = RANSACRegressor(
         estimator=base_estimator,
         max_trials=1000,
         min_samples=max(10, len(X) // 100),
         residual_threshold=0.1,
-        random_state=42
+        random_state=42,
     )
-    
+
     ransac.fit(X, y)
     scale_factor = ransac.estimator_.coef_[0]
     inlier_mask = ransac.inlier_mask_
     inlier_ratio = np.sum(inlier_mask) / len(inlier_mask)
-    
+
     print(f"RANSAC scale: {scale_factor:.6f}, inlier ratio: {inlier_ratio:.4f}")
-    
+
     if 0.1 < scale_factor < 10.0:
         return scale_factor, inlier_ratio
     else:
         print(f"Warning: Unreasonable scale {scale_factor}, using 1.0")
         return 1.0, inlier_ratio
+
             
-def compute_scale_weighted(depth1, depth2, conf1, conf2, conf_threshold_ratio=0.1, 
+def compute_scale_weighted(depth1, depth2, conf1, conf2,mask, conf_threshold_ratio=0.1,
                           weight_power=2.0, robust_quantile=0.9):
     """
     Args:
@@ -1001,7 +1015,11 @@ def compute_scale_weighted(depth1, depth2, conf1, conf2, conf_threshold_ratio=0.
     valid_mask = (conf1_flat > conf_threshold) & (conf2_flat > conf_threshold) & \
                  (depth1_flat > 1e-3) & (depth2_flat > 1e-3) & \
                  (depth1_flat < 100) & (depth2_flat < 100)
-    
+
+    if mask is not None:
+        mask = mask.reshape(-1)
+        valid_mask = valid_mask & mask
+
     if np.sum(valid_mask) < 100:
         print(f"Warning: Only {np.sum(valid_mask)} valid points, using default scale 1.0")
         return 1.0, 0.0
@@ -1040,16 +1058,16 @@ def compute_scale_weighted(depth1, depth2, conf1, conf2, conf_threshold_ratio=0.
         print(f"Warning: Unreasonable scale {scale_quantile}, using 1.0")
         return 1.0, confidence_score
 
-def compute_chunk_scale_advanced(depth1, depth2, conf1, conf2, method='auto'):
+def compute_chunk_scale_advanced(depth1, depth2, conf1, conf2,   mask, method='auto'):
     """
         method: 'auto', 'ransac', 'weighted'
     """
     if method == 'ransac':
-        scale, score = compute_scale_ransac(depth1, depth2, conf1, conf2)
+        scale, score = compute_scale_ransac(depth1, depth2, conf1, conf2 ,mask)
         return scale, score, 'ransac'
     
     elif method == 'weighted':
-        scale, score = compute_scale_weighted(depth1, depth2, conf1, conf2)
+        scale, score = compute_scale_weighted(depth1, depth2, conf1, conf2,mask)
         return scale, score, 'weighted'
     
     elif method == 'auto':
@@ -1075,7 +1093,7 @@ def compute_chunk_scale_advanced(depth1, depth2, conf1, conf2, method='auto'):
         final_quality = max(ransac_quality, weighted_quality)
         return final_scale, final_quality, final_method
 
-def precompute_scale_chunks_with_depth(chunk1_depth, chunk1_conf, chunk2_depth, chunk2_conf, 
+def precompute_scale_chunks_with_depth(chunk1_depth, chunk1_conf, chunk2_depth, chunk2_conf,   mask,
                                method='auto'):
     """
     Args:
@@ -1087,7 +1105,7 @@ def precompute_scale_chunks_with_depth(chunk1_depth, chunk1_conf, chunk2_depth, 
     """
     
     scale_factor, quality_score, method_used = compute_chunk_scale_advanced(
-        chunk1_depth, chunk2_depth, chunk1_conf, chunk2_conf, method
+        chunk1_depth, chunk2_depth, chunk1_conf, chunk2_conf,   mask, method
     )
     
     print(f"Final scale: {scale_factor:.6f}, quality: {quality_score:.4f}, method: {method_used}")
@@ -1099,7 +1117,7 @@ def precompute_scale_chunks_with_depth(chunk1_depth, chunk1_conf, chunk2_depth, 
 from loop_utils.alignment_triton import robust_weighted_estimate_sim3_triton
 from loop_utils.alignment_torch import robust_weighted_estimate_sim3_torch
 
-def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_threshold, config, precompute_scale = None):
+def weighted_align_point_maps(point_map1, conf1, point_map2, conf2,mask, conf_threshold, config, precompute_scale = None):
     """ point_map2 -> point_map1"""
     b1, _, _, _ = point_map1.shape
     b2, _, _, _ = point_map2.shape
@@ -1116,6 +1134,8 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, conf_thresho
         mask1 = conf1[i] > conf_threshold
         mask2 = conf2[i] > conf_threshold
         valid_mask = mask1 & mask2
+        if mask is not None:
+            valid_mask = valid_mask & mask[i].squeeze()
 
         idx = np.where(valid_mask)
         if len(idx[0]) == 0:

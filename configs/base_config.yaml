@@ -1,7 +1,12 @@
 Weights:
-  model: 'Pi3'# choose between 'VGGT' or 'Pi3'
+  model: 'VGGT' # choose between 'VGGT' or 'Pi3' or 'Mapanything' or 'DA3'
   VGGT: './weights/model.pt'
-  Pi3:  './weights/Pi3/model.safetensors'
+  Pi3: './weights/Pi3/model.safetensors'
+  Map: './weights/map_anything'
+
+  DA3: './weights/DA3/model.safetensors'
+  DA3_CONFIG: './weights/DA3/config.json'
+
   DBoW: './weights/ORBvoc.txt'
   SALAD: './weights/dino_salad.ckpt'
   DNIO: './weights/dinov2_vitb14_pretrain.pth'
@@ -16,10 +21,16 @@ Model:
   temp_files_location: 'disk' # choose between 'disk' or 'cpu_memory'
   # [!!Attention!!] Please ensure sufficient CPU memory if you choose 'cpu_memory' for temp_files_location!
   align_lib: 'triton' # choose among 'triton' (GPU), 'torch' (GPU), 'numba' (CPU) or 'numpy' (CPU)
-  align_method: 'sim3' # choose among 'sim3', 'se3' or 'scale+se3'
-  scale_compute_method: 'auto' # choose among 'auto', 'ransac' or 'weighted'. It is used when align_method == 'scale+se3'
+  align_method: 'sim3' # choose among 'sim3', 'se3' or 'scale+se3'.mapanything need se3
+  scale_compute_method: 'ransac' # choose among 'auto', 'ransac' or 'weighted'. It is used when align_method == 'scale+se3'
   align_type: 'dense' # choose between 'dense' or 'sparse'. Sparse align is constructing, not avaible for now
 
+  calib: True #only mapanything;get k from kitti for input
+  h: 376 # input h
+  w: 1241 #input w
+
+
+  ref_view_strategy: 'saddle_balanced' # 'middle', 'saddle_balanced', 'first' or 'saddle_sim_range' used in DA3
   reference_frame_mid: False
   # If reference_frame_mid == True, use the middle frame within the chunk as the
   # reference frame to alleviate the scale drift when loop closure is not available.
@@ -47,14 +58,14 @@ Loop:
   SALAD:
     image_size: [336, 336]
     batch_size: 32
-    similarity_threshold: 0.85 # We found that adjusting the threshold from the original 0.7 to 0.85 
+    similarity_threshold: 0.85 # We found that adjusting the threshold from the original 0.7 to 0.85
                                # could significantly reduce false matches.
     top_k: 5
     use_nms: True
     nms_threshold: 25
 
   SIM3_Optimizer:
-    lang_version: 'cpp' 
+    lang_version: 'cpp'
     # choose between 'cpp' or 'python'. will auto set 'python' if c++ version has not installed
     max_iterations: 30
     lambda_init: 1e-6

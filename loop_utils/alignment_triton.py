@@ -348,7 +348,6 @@ def robust_weighted_estimate_sim3_triton(src, tgt, init_weights, delta=0.1, max_
         print(f'Iter {iter}: Mean residual = {mean_residual:.6f}')
         
         huber_weights = compute_huber_weights_triton(residuals, delta)
-        
         combined_weights = init_weights_torch * huber_weights
         combined_weights_sum = torch.sum(combined_weights)
         if combined_weights_sum > 1e-12:
