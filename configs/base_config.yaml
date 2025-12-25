@@ -21,9 +21,9 @@ Model:
   # reference frame to alleviate the scale drift when loop closure is not available.
   # Disable it for now cuz i found some bugs related to this feature [by deng on 09 Oct].
 
-  calib: False:#y mapanything;get t
-  h: 376 # input h
-  w: 1241 # input w
+  calib: False # Only available when using MapAnything
+  h: 376 # Input h
+  w: 1241 # Input w
 
 
   IRLS:
