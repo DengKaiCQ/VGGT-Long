@@ -1,0 +1,15 @@
+# String for model factory
+model_str: "mast3r"
+# Model config
+model_config:
+  name: "mast3r"
+  # Checkpoint path
+  ckpt_path: "${root_pretrained_checkpoints_dir}/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth"
+  # Cache dir
+  cache_dir: "${root_pretrained_checkpoints_dir}/mast3r_cache"
+# Image Normalization Type
+data_norm_type: "dust3r"
+# MASt3R checkpoint is already loaded in the inference wrapper
+pretrained: null
+# Torch hub force reload
+torch_hub_force_reload: false

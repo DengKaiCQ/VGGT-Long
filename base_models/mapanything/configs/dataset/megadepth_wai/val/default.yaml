@@ -1,0 +1,26 @@
+dataset_str:
+  "MegaDepthWAI(
+    split='${dataset.megadepth_wai.val.split}',
+    resolution=${dataset.megadepth_wai.val.dataset_resolution},
+    principal_point_centered=${dataset.megadepth_wai.val.principal_point_centered},
+    seed=${dataset.megadepth_wai.val.seed},
+    transform='${dataset.megadepth_wai.val.transform}',
+    data_norm_type='${dataset.megadepth_wai.val.data_norm_type}',
+    ROOT='${dataset.megadepth_wai.val.ROOT}',
+    dataset_metadata_dir='${dataset.megadepth_wai.val.dataset_metadata_dir}',
+    overfit_num_sets=${dataset.megadepth_wai.val.overfit_num_sets},
+    variable_num_views=${dataset.megadepth_wai.val.variable_num_views},
+    num_views=${dataset.megadepth_wai.val.num_views},
+    covisibility_thres=${dataset.megadepth_wai.val.covisibility_thres})"
+split: 'val'
+dataset_resolution: ${dataset.resolution_val_megadepth}
+principal_point_centered: ${dataset.principal_point_centered}
+seed: 777
+transform: 'imgnorm'
+data_norm_type: ${model.data_norm_type}
+ROOT: ${root_data_dir}/megadepth
+dataset_metadata_dir: ${mapanything_dataset_metadata_dir}
+overfit_num_sets: null
+variable_num_views: ${dataset.val.variable_num_views}
+num_views: ${dataset.num_views}
+covisibility_thres: 0.25

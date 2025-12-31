@@ -1,0 +1,41 @@
+# Random Seed
+seed: 0
+# Maximum number of images per GPU (changes based on available GPU memory)
+max_num_of_imgs_per_gpu: 48
+# Accumulate gradient iterations (for increasing the effective batch size under memory constraints)
+accum_iter: 1
+# Maximum number of epochs for the scheduler
+epochs: 100
+## Default Optimizer parameters
+# Learning rate (absolute lr)
+lr: 0.0001
+# Lower lr bound for cyclic schedulers that hit 0
+min_lr: 1e-06
+# Epochs to warmup LR
+warmup_epochs: 10
+# Weight decay
+weight_decay: 0.05
+# LR schedule type
+schedule_type: "linear_warmup_half_cycle_cosine_decay"
+# Warn if model params are not in the below submodule_configs
+warn_not_in_submodule: False
+# Optimizer parameters specific to submodules
+submodule_configs: {}
+# Use Automatic Mixed Precision for pretraining
+amp: 1
+# Floating point type to use for mixed precision training
+amp_dtype: "bf16"
+# Disable CUDNN Benchmark (Disable for variable resolution & number of view training)
+disable_cudnn_benchmark: true
+# Freeze the validation samples across all epochs
+freeze_val_samples_across_all_epochs: true
+# Test loss evaluation frequency
+eval_freq: 1
+# Frequency (number of epochs) to save checkpoint in checkpoint-last.pth
+save_freq: 1
+# Frequency (number of epochs) to save checkpoint in checkpoint-%d.pth
+keep_freq: 10
+# Frequence (number of iterations) to print infos while training (includes tensorboard logging)
+print_freq: 20
+# Resume Training from last checkpoint
+resume: True

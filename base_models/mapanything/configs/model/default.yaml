@@ -1,0 +1,16 @@
+# String for model factory (Options: "mapanything", "mapanything_ablations", "modular_dust3r", "vggt", "pi3")
+model_str: ???
+# Model config
+model_config:
+  # Path to pretrained model checkpoint
+  pretrained_checkpoint_path: null
+  # Load specific submodules from the checkpoint
+  load_specific_pretrained_submodules: False
+  # List of submodules to load from the checkpoint (if load_specific_pretrained_submodules is True)
+  specific_pretrained_submodules: []
+# Path of a starting checkpoint (to enable backward compatibility with original DUSt3R class)
+pretrained: null
+# Image normalization type
+data_norm_type: ???
+# Torch hub force reload
+torch_hub_force_reload: False

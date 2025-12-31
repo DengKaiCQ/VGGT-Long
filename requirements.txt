@@ -10,10 +10,14 @@ onnxruntime
 pyparsing
 importlib_metadata
 
-xformers == 0.0.28.post3
+xformers == 0.0.24
 faiss-gpu
 pandas
 prettytable
 pytorch-lightning
 pytorch-metric-learning
 torchmetrics
+gradio==5.17.1
+trimesh
+matplotlib
+scipy

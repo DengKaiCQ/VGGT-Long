@@ -1,3 +1,6 @@
+# References:
+#   https://github.com/yyfz/Pi3/blob/main/pi3/utils/basic.py
+
 import os
 import os.path as osp
 import math

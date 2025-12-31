@@ -1,0 +1,26 @@
+dataset_str:
+  "ScanNetPPWAI(
+    split='${dataset.scannetpp_wai.val.split}',
+    resolution=${dataset.scannetpp_wai.val.dataset_resolution},
+    principal_point_centered=${dataset.scannetpp_wai.val.principal_point_centered},
+    seed=${dataset.scannetpp_wai.val.seed},
+    transform='${dataset.scannetpp_wai.val.transform}',
+    data_norm_type='${dataset.scannetpp_wai.val.data_norm_type}',
+    ROOT='${dataset.scannetpp_wai.val.ROOT}',
+    dataset_metadata_dir='${dataset.scannetpp_wai.val.dataset_metadata_dir}',
+    overfit_num_sets=${dataset.scannetpp_wai.val.overfit_num_sets},
+    variable_num_views=${dataset.scannetpp_wai.val.variable_num_views},
+    num_views=${dataset.scannetpp_wai.val.num_views},
+    covisibility_thres=${dataset.scannetpp_wai.val.covisibility_thres})"
+split: 'val'
+dataset_resolution: ${dataset.resolution_val_scannetpp}
+principal_point_centered: ${dataset.principal_point_centered}
+seed: 777
+transform: 'imgnorm'
+data_norm_type: ${model.data_norm_type}
+ROOT: ${root_data_dir}/scannetppv2
+dataset_metadata_dir: ${mapanything_dataset_metadata_dir}
+overfit_num_sets: null
+variable_num_views: ${dataset.val.variable_num_views}
+num_views: ${dataset.num_views}
+covisibility_thres: 0.25

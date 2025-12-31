@@ -1,0 +1,26 @@
+dataset_str:
+  "TartanAirV2WBWAI(
+    split='${dataset.tav2_wb_wai.val.split}',
+    resolution=${dataset.tav2_wb_wai.val.dataset_resolution},
+    principal_point_centered=${dataset.tav2_wb_wai.val.principal_point_centered},
+    seed=${dataset.tav2_wb_wai.val.seed},
+    transform='${dataset.tav2_wb_wai.val.transform}',
+    data_norm_type='${dataset.tav2_wb_wai.val.data_norm_type}',
+    ROOT='${dataset.tav2_wb_wai.val.ROOT}',
+    dataset_metadata_dir='${dataset.tav2_wb_wai.val.dataset_metadata_dir}',
+    overfit_num_sets=${dataset.tav2_wb_wai.val.overfit_num_sets},
+    variable_num_views=${dataset.tav2_wb_wai.val.variable_num_views},
+    num_views=${dataset.tav2_wb_wai.val.num_views},
+    covisibility_thres=${dataset.tav2_wb_wai.val.covisibility_thres})"
+split: 'val'
+dataset_resolution: ${dataset.resolution_val_tav2_wb}
+principal_point_centered: ${dataset.principal_point_centered}
+seed: 777
+transform: 'imgnorm'
+data_norm_type: ${model.data_norm_type}
+ROOT: ${root_data_dir}/tav2_wb
+dataset_metadata_dir: ${mapanything_dataset_metadata_dir}
+overfit_num_sets: null
+variable_num_views: ${dataset.val.variable_num_views}
+num_views: ${dataset.num_views}
+covisibility_thres: 0.25

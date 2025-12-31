@@ -1,0 +1,23 @@
+stage: # set stage via CLI
+root: # path of wai-formatted dataset
+
+gpus: 0
+cpus: 10
+mem: 20
+scenes_per_job: 20
+conda_env: # pass the name of our conda environment
+nodelist:
+
+stages:
+  conversion:
+    script: conversion/blendedmvs.py
+    config: conversion/blendedmvs.yaml
+    scenes_per_job: 50
+  covisibility:
+    script: covisibility.py
+    config: covisibility/covisibility_gt_depth_mvs.yaml
+    gpus: 1
+  moge:
+    script: run_moge.py
+    config: moge/default.yaml
+    gpus: 1

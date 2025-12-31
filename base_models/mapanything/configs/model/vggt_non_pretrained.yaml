@@ -1,0 +1,17 @@
+# String for model factory
+model_str: "vggt"
+# Model config
+model_config:
+  name: "vggt"
+  # Load pre-trained weights
+  load_pretrained_weights: false
+  # Load custom checkpoint
+  load_custom_ckpt: false
+  # Custom checkpoint path
+  custom_ckpt_path: null
+# Image Normalization Type
+data_norm_type: "identity"
+# VGGT checkpoint is already loaded in the inference wrapper
+pretrained: null
+# Torch hub force reload
+torch_hub_force_reload: false

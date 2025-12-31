@@ -1,0 +1,28 @@
+# Model type (Options: ["cross_attention", "global_attention", "alternating_attention"])
+model_type: "alternating_attention"
+# Model class type (Options: ["no_intermediate_features", "intermediate_features"])
+model_return_type: "intermediate_features"
+# Custom positional encoding (Options: ["RoPEfreq"], Callable Function, null)
+custom_positional_encoding: null
+# Module arguments
+module_args:
+  # Name of the info sharing module
+  name: "aat_48_layers_ifr"
+  # Indices of the intermediate features to be shared (indices start from 0)
+  indices: [11, 23, 35]
+  # Normalize intermediate features
+  norm_intermediate: True
+  # Size string
+  size: "48_layers"
+  # Depth (this includes both frame-wise and gloabl attention layers)
+  depth: 48
+  # Feature dim (similar to ViT-Large)
+  dim: 1024
+  # Number of heads (similar to ViT-Large)
+  num_heads: 16
+  # Distinguish Reference and Non-Reference Views
+  distinguish_ref_and_non_ref_views: True
+  # Scale Entropy in Attention
+  use_entropy_scaling: True
+  # Flag to indicate whether to use gradient checkpointing
+  gradient_checkpointing: False

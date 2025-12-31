@@ -1,0 +1,32 @@
+root:  # needs to be set via argument: root=<wai_dataset_root_path>
+
+model_path: data_processing/wai_processing/third_party/mvsanywhere/src
+model_name: mvsanywhere
+ckpt_path: data_processing/wai_processing/third_party/mvsanywhere/checkpoints/mvsanywhere_hero.ckpt
+out_path: mvsanywhere/v0 # to enable some simple versioning
+
+
+scene_filters:
+  - exists: images
+  - exists: scene_meta.json
+  - process_state: [undistortion, finished]
+  - process_state_not: [mvsanywhere, finished]
+
+frame_modalities: # what to load for each frame
+  - image
+
+random_scene_processing_order: false
+
+batch_size: 2
+num_workers: 16
+
+
+# mvsanywhere specific parameters
+val_image_height: 480
+val_image_width: 640
+image_height: 480
+image_width: 640
+prediction_scale: 1
+
+config_file: data_processing/wai_processing/third_party/mvsanywhere/configs/models/mvsanywhere_model.yaml
+data_config_file: data_processing/wai_processing/third_party/mvsanywhere/configs/data/wai/wai_empty.yaml

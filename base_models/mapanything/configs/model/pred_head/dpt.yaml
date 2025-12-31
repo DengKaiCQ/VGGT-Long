@@ -1,0 +1,15 @@
+defaults:
+  - adaptor_config: pointmap_confidence
+
+type: "dpt"
+feature_head:
+  feature_dim: 256
+  hooks: [0, 1, 2, 3]
+  checkpoint_gradient: ${model.pred_head.gradient_checkpointing}
+regressor_head:
+  output_dim: ${model.pred_head.adaptor_config.input_dim}
+  checkpoint_gradient: ${model.pred_head.gradient_checkpointing}
+adaptor_type: ${model.pred_head.adaptor_config.type}
+adaptor: ${model.pred_head.adaptor_config.init_dict}
+# Flag to indicate whether to use gradient checkpointing
+gradient_checkpointing: False

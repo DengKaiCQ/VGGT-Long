@@ -1,0 +1,6 @@
+# Distributed Training Params
+# Number of distributed processes
+world_size: 1
+local_rank: -1
+# Url used to set up distributed training
+dist_url: 'env://'

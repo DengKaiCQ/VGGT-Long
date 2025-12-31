@@ -2,10 +2,8 @@
 <p align="center">
 <h1 align="center">VGGT-Long: Chunk it, Loop it, Align it, Pushing VGGT's Limits on Kilometer-scale Long RGB Sequences</h1>
       <strong><h4 align="center"><a href="https://arxiv.org/abs/2507.16443" target="_blank">Paper</a> | <a href="http://xhslink.com/o/7p42O3mRctf" target="_blank">RedNote</a> | <a href="https://www.youtube.com/watch?v=xeRQGerAYOs" target="_blank">YouTube</a></h4></strong>
-      <h4 align="center"><i>Related Repo</i>:  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md" target="_blank">DA3-Streaming</a> | <a href="https://github.com/msilaev/VGGT-Long-Gsplat" target="_blank">VGGT-Long-Gsplat</a> </h4> 
+      <h4 align="center"><i>Related Repo</i>:  <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">Pi-Long</a> | <a href="https://github.com/DengKaiCQ/Pi-Long" target="_blank">DA3-Long (Coming Soon)</a> </h4>
 </p>
-
-
 
 This repository contains the source code for our work:
 
@@ -23,18 +21,9 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 ![method](./assets/method.png)
 ![details](./assets/details.png)
 
-
-### **News**
-
-`[11 Dec 2025]` Released the [DA3-Streaming](https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/da3_streaming/README.md).
-
-`[04 Sep 2025]` Released the [Pi-Long](https://github.com/DengKaiCQ/Pi-Long).
-
-`[22 Jul 2025]` Arxiv submitted.
-
 ### **Updates**
 
-`[12 Dec 2025]` 1. We refactored the original architecture to support arbitrary foundation models, including `VGGT`, `Pi3`, and `MapAnything`. The current pipeline can be extended to future 3D foundation models easily. 2. Leveraging `MapAnything`'s multimodal inputs and its ability to predict metric/real scale, `Map-Long` achieved a great performance in the setting of metric scale with $\text{SE}(3)$ alignment.
+`[TO BE DONE]` We are working on a feature, that is, using sparse points instead of dense points for chunk align. This way, we can achieve a way more faster alignment speed and skip DISK I/O when chunk aligning.
 
 `[05 Nov 2025]` We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
 
@@ -94,8 +83,8 @@ conda activate vggt-long
 Next, install `PyTorch`,
 
 ```cmd
-pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu118
-# Verified to work with CUDA 11.8 and torch 2.5.1
+pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
+# Verified to work with CUDA 11.8 and torch 2.2.0
 ```
 
 Install other requirements,
@@ -106,7 +95,7 @@ pip install -r requirements.txt
 
 #### Step 2: Weights Download
 
-Download all the pre-trained weights needed(Download weights for VGGT, Pi3, and MapAnything by default.):
+Download all the pre-trained weights needed:
 
 ```cmd
 bash ./scripts/download_weights.sh
@@ -159,7 +148,22 @@ pip install ./DPRetrieval
 
 </details>
 
-#### Step 5 (Optional) : Install mapanything as a package into the  vggt-long environment,if you want to use mapanything.[Link](https://github.com/facebookresearch/map-anything?tab=readme-ov-file#installation)
+#### Step 5 (Optional) : More Foundation Models Included & Visualization
+
+We have implemented incremental reconstruction for VGGT-Long/Pi3-Long/MapAnything-Long/DA3-Long and created a web-based demo visualization using gradio, which runs on a local port. In the demo's display window, you can observe the entire reconstruction process in real time. Additionally, we have enabled online alignment and accelerated the process using GPU, with the new GPU-accelerated code synchronized with the [DA3-Streaming](https://github.com/ByteDance-Seed/Depth-Anything-3/tree/main/da3_streaming). 
+
+First, you need to download the weights of other foundation models:
+
+```cmd
+bash ./scripts/download_other_weights.sh
+```
+
+For MapAnything and DA3, you need to navigate to `base_models/mapanything` and `base_models/depth_anything3` respectively and run the following cmd to install them into your environment:
+
+```cmd
+pip install -e .
+```
+
 
 ### 🚀 3 - Running the code
 
@@ -174,8 +178,6 @@ You can modify the parameters in the `configs/base_config.yaml` file. If you hav
 python vggt_long.py --image_dir ./path_of_images --config ./configs/base_config.yaml
 ```
 
-You can change the 'model' in config to use a different foundation model.
-
 You may run the following cmd if you got videos before `python vggt_long.py`.
 
 ```
@@ -183,78 +185,16 @@ mkdir ./extract_images
 ffmpeg -i your_video.mp4 -vf "fps=5,scale=518:-1" ./extract_images/frame_%06d.png
 ```
 
-### 🛠️ 4 - Possible Problems You May Encounter
-
-You may encounter some problems. We have collected some questions and their solutions. If you encounter similar problems, you can refer to them.
-
-<details>
-  <summary><strong>See details</a></strong></summary>
-
-#### **a. Error about `libGL.so.1`.**
-
-The error comes from `opencv-python`, please run the following cmd to install the system dependencies.
+You can run the following cmd to launch the web visualization (defaults to local port 8080):
 
 ```cmd
-sudo apt-get install -y libgl1-mesa-glx
+python app.py
 ```
 
 
-#### **b. Unable to install faiss-gpu (which is used in Loop Closure)**
+### 🚨 4 - **Important Notice**: Memory Management & Requirements
 
-for example,
-```cmd
-ERROR: Could not find a version that satisfies the requirement faiss-gpu (from versions: none)
-ERROR: No matching distribution found for faiss-gpu
-```
-
-
-To address this issue, you can modify the `requirements.txt` file as follows:
-
-```cmd
-...
-faiss-gpu -> faiss-gpu-cu11 or faiss-gpu-cu12
-...
-```
-
-Then reinstall requirements:
-
-```cmd
-pip install -r requirements.txt
-```
-
-You can also find some alternative solutions at this link ([Stackoverflow](https://stackoverflow.com/questions/78200859/how-can-i-install-faiss-gpu)).
-
-If this problem still remains unsolved. You may consider proceeding to Step 4 in the Environment Setup.
-
-
-#### **c. Module `torch` has no attribute `uint64`.**
-
-Checking [#21](https://github.com/DengKaiCQ/VGGT-Long/issues/21), you could downgrade the library `safetensors` to `0.5.3`.
-
-#### **d. Significant drift occurred in the video we recorded with our own mobile device?**
-
-
-This issue is likely caused by either minimal movement in your video or an excessively high frame rate, leading to accumulated drift. We have observed that with very dense input where movement between consecutive frames is small, the model's drift can increase to noticeable levels. You could try extracting video frames at a lower frame rate, such as `1fps` (this is similar to keyframe processing in Visual SLAM):
-
-```cmd
-ffmpeg -i your_video.mp4 -vf "fps=1,scale=518:-1" ./extract_images/frame_%06d.png
-```
-
-You may also consider switching to `Pi-Long` / `Map-Long` / `DA3-Long`, as better base models can help mitigate this issue to some extent.
-
-Please ensure that the videos you record are free from motion blur, as the base model currently handles motion blur with limited stability.  
-
-- Record at higher frame rates (e.g., 60 FPS) to reduce exposure time per frame
-- Use a camera stabilizer or enable stabilization features
-- Prefer wide-angle lenses, which exhibit less apparent blur from camera shake due to their larger field of view
-- Ensure adequate lighting in dark environments to prevent the camera from increasing shutter time
-- If familiar with photography, use professional mode to increase shutter speed while widening the aperture and increasing ISO
-
-</details>
-
-### 🚨 5 - Important Notice: Memory Management & Requirements
-
-In long-sequence scenarios, addressing CPU memory and GPU memory limitations has always been a core challenge. VGGT-Long resolves **GPU** memory limitations encountered by VGGT through chunk-based input partitioning. As for **CPU** memory constraints, we achieve lower CPU memory usage by storing intermediate results on the **disk** (the consequences of CPU memory overflow are far more severe than GPU issues, while GPU OOM may simply terminate the program, **CPU OOM can cause complete system freeze**, which we absolutely want to avoid). VGGT-Long automatically retrieves locally stored intermediate results when needed. Upon completion, these temporary files are **automatically deleted** to prevent excessive disk space consumption. This implementation implies two key considerations:
+In long-sequence scenarios, addressing CPU memory and GPU memory limitations has always been a core challenge. VGGT-Long resolves **GPU** memory limitations encountered by VGGT through chunk-based input partitioning. As for **CPU** memory constraints, we achieve lower CPU memory usage by storing intermediate results on the **disk** (the consequences of CPU memory overflow are far more severe than GPU issues - while GPU OOM may simply terminate the program, **CPU OOM can cause complete system freeze**, which we absolutely want to avoid). VGGT-Long automatically retrieves locally stored intermediate results when needed. Upon completion, these temporary files are **automatically deleted** to prevent excessive disk space consumption. This implementation implies two key considerations:
 
 1. Before running, **sufficient disk space** must be reserved (approximately 50GiB for 4500-frame KITTI 00 sequences, or ~5GiB for 300-frame short sequences);
 

@@ -8,6 +8,9 @@
 # Modified from https://github.com/facebookresearch/co-tracker/
 
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/dependency/track_modules/blocks.py
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

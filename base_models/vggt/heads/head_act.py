@@ -5,6 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/heads/head_act.py
+
 import torch
 import torch.nn.functional as F
 

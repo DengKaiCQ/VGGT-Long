@@ -5,6 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/dependency/track_modules/track_refine.py
+
 import numpy as np
 import torch
 import torch.nn as nn

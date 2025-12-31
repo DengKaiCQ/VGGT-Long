@@ -7,6 +7,9 @@
 
 # Modified from https://github.com/facebookresearch/co-tracker/
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/heads/track_modules/blocks.py
+
 import math
 import torch
 import torch.nn as nn

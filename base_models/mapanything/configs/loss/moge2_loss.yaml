@@ -1,0 +1,4 @@
+# Training Loss
+train_criterion: "ExcludeTopNPercentPixelLoss(Regr3D(RobustRegressionLoss(alpha=0.5, scaling_c=0.05), norm_mode='?avg_dis', loss_in_log=True, flatten_across_image_only=True), top_n_percent=5, apply_to_real_data_only=True) + 3.0 * NormalGMLoss(norm_mode='avg_dis', apply_normal_and_gm_loss_to_synthetic_data_only=True)"
+# Validation Loss
+test_criterion: "ExcludeTopNPercentPixelLoss(Regr3D(RobustRegressionLoss(alpha=0.5, scaling_c=0.05), norm_mode='?avg_dis', loss_in_log=True, flatten_across_image_only=True), top_n_percent=5, apply_to_real_data_only=True) + 3.0 * NormalGMLoss(norm_mode='avg_dis', apply_normal_and_gm_loss_to_synthetic_data_only=True)"

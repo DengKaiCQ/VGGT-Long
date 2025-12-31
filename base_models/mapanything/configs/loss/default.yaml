@@ -1,0 +1,6 @@
+# Training Loss, For example: "ConfLoss(Regr3D(L21, norm_mode='avg_dis'), alpha=0.2)"
+train_criterion: ""
+# Validation Loss, For example:
+# "Regr3D_ScaleShiftInv(L21, norm_mode='?avg_dis', ambiguous_loss_value=0)" (DUSt3R)
+# "Regr3D(L21, norm_mode='?avg_dis', ambiguous_loss_value=2)" (MASt3R)
+test_criterion: ""

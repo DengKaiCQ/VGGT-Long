@@ -1,3 +1,6 @@
+# References:
+#   https://github.com/yyfz/Pi3/blob/main/pi3/models/pi3.py
+
 import torch
 import torch.nn as nn
 from functools import partial

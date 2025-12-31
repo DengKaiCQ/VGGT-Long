@@ -1,0 +1,6 @@
+defaults:
+  - default
+
+# Use lower lr for finetuning
+lr: 1e-05
+min_lr: 1e-07

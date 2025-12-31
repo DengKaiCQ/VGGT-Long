@@ -195,8 +195,15 @@ def predictions_to_glb(
     # Prepare 4x4 matrices for camera extrinsics
     num_cameras = len(camera_matrices)
     extrinsics_matrices = np.zeros((num_cameras, 4, 4))
-    extrinsics_matrices[:, :3, :4] = camera_matrices
-    extrinsics_matrices[:, 3, 3] = 1
+    
+    # Check if input is 3x4 or 4x4
+    if camera_matrices.shape[1] == 3 and camera_matrices.shape[2] == 4:
+        extrinsics_matrices[:, :3, :4] = camera_matrices
+        extrinsics_matrices[:, 3, 3] = 1
+    elif camera_matrices.shape[1] == 4 and camera_matrices.shape[2] == 4:
+        extrinsics_matrices = camera_matrices
+    else:
+        raise ValueError(f"Unexpected camera matrix shape: {camera_matrices.shape}")
 
     if show_cam:
         # Add camera models to the scene
@@ -226,8 +233,9 @@ def integrate_camera_into_scene(scene: trimesh.Scene, transform: np.ndarray, fac
         scene_scale (float): Scale of the scene.
     """
 
-    cam_width = scene_scale * 0.05
-    cam_height = scene_scale * 0.1
+    # Shrink camera frustum to 1/10 of previous size for clearer view
+    cam_width = scene_scale * 0.01
+    cam_height = scene_scale * 0.02
 
     # Create cone shape for camera
     rot_45_degree = np.eye(4)

@@ -4,6 +4,66 @@ import numpy as np
 import sys
 import os
 import sys
+import json
+from safetensors.torch import load_file
+
+def depth_to_point_cloud_vectorized(depth, intrinsics, extrinsics, device=None):
+    """
+    depth: [N, H, W] numpy array or torch tensor
+    intrinsics: [N, 3, 3] numpy array or torch tensor
+    extrinsics: [N, 3, 4] (w2c) numpy array or torch tensor
+    Returns: point_cloud_world: [N, H, W, 3] same type as input
+    """
+    input_is_numpy = False
+    if isinstance(depth, np.ndarray):
+        input_is_numpy = True
+
+        depth_tensor = torch.tensor(depth, dtype=torch.float32)
+        intrinsics_tensor = torch.tensor(intrinsics, dtype=torch.float32)
+        extrinsics_tensor = torch.tensor(extrinsics, dtype=torch.float32)
+
+        if device is not None:
+            depth_tensor = depth_tensor.to(device)
+            intrinsics_tensor = intrinsics_tensor.to(device)
+            extrinsics_tensor = extrinsics_tensor.to(device)
+    else:
+        depth_tensor = depth
+        intrinsics_tensor = intrinsics
+        extrinsics_tensor = extrinsics
+
+    if device is not None:
+        depth_tensor = depth_tensor.to(device)
+        intrinsics_tensor = intrinsics_tensor.to(device)
+        extrinsics_tensor = extrinsics_tensor.to(device)
+
+    # main logic
+
+    N, H, W = depth_tensor.shape
+
+    device = depth_tensor.device
+
+    u = torch.arange(W, device=device).float().view(1, 1, W, 1).expand(N, H, W, 1)
+    v = torch.arange(H, device=device).float().view(1, H, 1, 1).expand(N, H, W, 1)
+    ones = torch.ones((N, H, W, 1), device=device)
+    pixel_coords = torch.cat([u, v, ones], dim=-1)
+
+    intrinsics_inv = torch.inverse(intrinsics_tensor)  # [N, 3, 3]
+    camera_coords = torch.einsum("nij,nhwj->nhwi", intrinsics_inv, pixel_coords)
+    camera_coords = camera_coords * depth_tensor.unsqueeze(-1)
+    camera_coords_homo = torch.cat([camera_coords, ones], dim=-1)
+
+    extrinsics_4x4 = torch.zeros(N, 4, 4, device=device)
+    extrinsics_4x4[:, :3, :4] = extrinsics_tensor
+    extrinsics_4x4[:, 3, 3] = 1.0
+
+    c2w = torch.inverse(extrinsics_4x4)
+    world_coords_homo = torch.einsum("nij,nhwj->nhwi", c2w, camera_coords_homo)
+    point_cloud_world = world_coords_homo[..., :3]
+
+    if input_is_numpy:
+        point_cloud_world = point_cloud_world.cpu().numpy()
+
+    return point_cloud_world
 
 # -------------------------------------------------------
 # Base class for all 3D models used in the unified pipeline.
@@ -62,7 +122,7 @@ class VGGTAdapter(Base3DModel):
     def load(self):
         """Load VGGT model and its weights into memory."""
         print('Loading VGGT model...')
-        from base_models.vggt.models.vggt import VGGT
+        from vggt.models.vggt import VGGT
 
         # Initialize model
         self.model = VGGT()
@@ -83,8 +143,8 @@ class VGGTAdapter(Base3DModel):
         Handles both normal mode and "middle reference frame" mode,
         which reorders and post-processes outputs for improved consistency.
         """
-        from base_models.vggt.utils.load_fn import load_and_preprocess_images
-        from base_models.vggt.utils.pose_enc import pose_encoding_to_extri_intri
+        from vggt.utils.load_fn import load_and_preprocess_images
+        from vggt.utils.pose_enc import pose_encoding_to_extri_intri
 
         # Load images and preprocess them into a tensor: [B, 3, H, W]
         images = load_and_preprocess_images(image_paths).to(self.device)
@@ -197,7 +257,7 @@ class Pi3Adapter(Base3DModel):
     def load(self):
         """Load Pi3 model and its safetensors weights."""
         print('Loading Pi3 model...')
-        from base_models.pi3.models.pi3 import Pi3
+        from pi3.models.pi3 import Pi3
         from safetensors.torch import load_file
 
         # Initialize model
@@ -214,7 +274,7 @@ class Pi3Adapter(Base3DModel):
         Run inference with Pi3 on a list of images.
         Pi3 expects batched input of shape [1, B, 3, H, W].
         """
-        from base_models.pi3.utils.basic import load_images_as_tensor_pi_long
+        from pi3.utils.basic import load_images_as_tensor_pi_long
 
         # Load images as Tensor: [B, 3, H, W]
         images = load_images_as_tensor_pi_long(image_paths).to(self.device)
@@ -384,7 +444,89 @@ class MapAnythingAdapter(Base3DModel):
             'extrinsic': process_tensor('extrinsic').unsqueeze(0),
             'intrinsic': k.unsqueeze(0),
             'depth': process_tensor('depth').unsqueeze(0),
-            'depth_conf':None,
+            'depth_conf':process_tensor('world_points_conf').unsqueeze(0),
             'images': process_tensor('images').permute(0, 3, 1, 2).unsqueeze(0),
             'mask': process_tensor('mask').unsqueeze(0)
+        }
+
+# ===================== DA3 Adapter =====================
+# Adapts DA3 to the unified 3D inference interface.
+# =======================================================
+
+class DA3Adapter(Base3DModel):
+    def load(self):
+        """Load DA3 model and its safetensors weights."""
+        print('Loading DA3 model...')
+        from depth_anything_3.api import DepthAnything3
+
+        with open(self.config["Weights"]["DA3_CONFIG"]) as f:
+            config = json.load(f)
+        self.model = DepthAnything3(**config)
+        weight = load_file(self.config["Weights"]["DA3"])
+        self.model.load_state_dict(weight, strict=False)
+
+        self.model.eval()
+        self.model = self.model.to(self.device)
+
+    def infer_chunk(self, image_paths: list) -> dict:
+        """
+        Run inference with DA3 on a list of images.
+        """
+        ref_view_strategy = self.config["Model"]["ref_view_strategy"]
+
+        torch.cuda.empty_cache()
+        with torch.no_grad():
+            with torch.cuda.amp.autocast(dtype=self.dtype):
+                images = image_paths
+                # images: ['xxx.png', 'xxx.png', ...]
+
+
+                predictions = self.model.inference(images, ref_view_strategy=ref_view_strategy)
+                # if self.k is not None:
+                #     intri = np.tile(self.k, (len(images), 1, 1))
+                #     predictions = self.model.inference(images, intrinsics=intri,ref_view_strategy=ref_view_strategy)
+                # else:
+                #     predictions = self.model.inference(images, ref_view_strategy=ref_view_strategy)
+
+
+                predictions.depth = np.squeeze(predictions.depth)
+                predictions.conf -= 1.0
+
+                world_points = depth_to_point_cloud_vectorized(predictions.depth, predictions.intrinsics,
+                                                               predictions.extrinsics)
+
+                # The model outputs W2C; take inverse to get C2W
+                # Convert 3x4 matrix [R|t] into 4x4 homogeneous matrix
+                extrinsics_tensor = torch.tensor(predictions.extrinsics, dtype=torch.float32)
+                N, _, _ = extrinsics_tensor.shape
+                extrinsics_tensor = extrinsics_tensor.to(self.device)
+                extrinsics_4x4 = torch.zeros(N, 4, 4, device=self.device)
+                extrinsics_4x4[:, :3, :4] = extrinsics_tensor
+                extrinsics_4x4[:, 3, 3] = 1.0
+
+                c2w = torch.inverse(extrinsics_4x4)
+
+                # if self.k is None:
+                #     self.k = np.mean(predictions.intrinsics, axis=0, keepdims=True)
+                #     N, proc_h, proc_w = predictions.depth.shape
+                #     scale_x =  self.config['Model']['w'] / proc_w
+                #     scale_y =  self.config['Model']['h'] / proc_h
+                #     self.k[0,0, 0] *= scale_x  # fx
+                #     self.k[0,0, 2] *= scale_x  # cx
+                #     self.k[0,1, 1] *= scale_y  # fy
+                #     self.k[0,1, 2] *= scale_y  # cy
+                #     print(self.k)
+
+
+        torch.cuda.empty_cache()
+
+        return {
+            'world_points': torch.tensor(world_points).to(self.device).unsqueeze(0) ,
+            'world_points_conf': torch.tensor(predictions.conf).to(self.device).unsqueeze(0),
+            'extrinsic': c2w.unsqueeze(0) ,  # already C2W
+            'intrinsic': torch.tensor(predictions.intrinsics).to(self.device).unsqueeze(0),
+            'depth': torch.tensor(predictions.depth).to(self.device).unsqueeze(0),
+            'depth_conf': torch.tensor(predictions.conf).to(self.device).unsqueeze(0),
+            'images': torch.tensor(predictions.processed_images).float().div_(255.0).to(self.device).permute(0, 3, 1, 2).unsqueeze(0),
+            'mask':  None
         }

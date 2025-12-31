@@ -8,6 +8,9 @@
 # Inspired by https://github.com/DepthAnything/Depth-Anything-V2
 
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/heads/dpt_head.py
+
 import os
 from typing import List, Dict, Tuple, Union
 

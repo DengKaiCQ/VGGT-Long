@@ -1,0 +1,29 @@
+defaults:
+  - default
+  - task: images_only
+
+# String for model factory
+model_str: "pow3r_ba"
+# Model config
+model_config:
+  name: "pow3r_ba"
+  # Checkpoint path
+  ckpt_path: "${root_pretrained_checkpoints_dir}/Pow3R_ViTLarge_BaseDecoder_512_linear.pth"
+  # Geometric input config
+  geometric_input_config: ${model.task}
+  # Scene graph for BA
+  scene_graph: "complete"
+  # Pairwise inference batch size
+  inference_batch_size: 32
+  # Global optim schedule
+  global_optim_schedule: "cosine"
+  # Global optim lr
+  global_optim_lr: 0.01
+  # Number of iterations for global optimization
+  global_optim_niter: 300
+# Image Normalization Type
+data_norm_type: "dust3r"
+# Pow3R checkpoint is already loaded in the inference wrapper
+pretrained: null
+# Torch hub force reload
+torch_hub_force_reload: false

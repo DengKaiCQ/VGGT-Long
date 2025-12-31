@@ -1,0 +1,17 @@
+# String for model factory
+model_str: "moge"
+# Model config
+model_config:
+  name: "moge-2"
+  # MoGe pre-trained model checkpoint string
+  model_string: "Ruicheng/moge-2-vitl"
+  # Load custom checkpoint
+  load_custom_ckpt: false
+  # Custom checkpoint path
+  custom_ckpt_path: null
+# Image Normalization Type
+data_norm_type: "identity"
+# MoGe checkpoint is already loaded in the inference wrapper
+pretrained: null
+# Torch hub force reload
+torch_hub_force_reload: false

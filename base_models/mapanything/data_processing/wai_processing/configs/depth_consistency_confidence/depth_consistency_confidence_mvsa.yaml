@@ -1,0 +1,26 @@
+root:  # needs to be set via argument: root=<wai_dataset_root_path>
+method_name: "mvsanywhere"
+
+out_path: ${method_name}/v0 # to enable some simple versioning
+
+scene_filters:
+  - exists: scene_meta.json
+  - process_state: [mvsanywhere, finished]
+  - process_state_not: [depth_consistency_confidence, finished]
+
+frame_modalities: # what to load for each frame
+  - pred_depth/${method_name}
+
+key_remap:
+  pred_depth/mvsanywhere: depth
+
+# higher resolution is more accurate, but takes lonker to compute
+target_size: 360 # long-side of depth image to resize to
+depth_confidence_thresh: 0.9 # minimum confidence for depth points
+
+# depth_consistency_confidence thresholds, tested for MVSA
+depth_assoc_error_thres_covis: 0.02 # maximum depth distance for points to be considered a match (usually smaller than for pairwise_covisibility computations)
+depth_assoc_rel_error_thres_covis: 0.02 # relative depth association error; helps with far points (usually smaller than for pairwise_covisibility computations)
+
+batch_size: 4
+num_workers: 4

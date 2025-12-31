@@ -1,3 +1,6 @@
+# References:
+#   https://github.com/yyfz/Pi3/blob/main/pi3/utils/debug.py
+
 import os
 import json
 import debugpy
@@ -48,7 +51,6 @@ def setup_debug(is_main_process=True, max_retries=10, port_range=(10000, 20000))
                     print(f"Port {port} is already in use, trying another...")
                     continue
 
-                # 更新 launch.json
                 update_vscode_launch_file(host, port)
 
                 print("master_addr = ", host)

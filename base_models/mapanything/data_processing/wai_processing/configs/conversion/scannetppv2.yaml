@@ -1,0 +1,12 @@
+original_root: # path of raw downloaded dataset
+root: # path of wai-formatted dataset
+
+test_split_fn: ${original_root}/../splits/nvs_test.txt
+
+dataset_name: scannetppv2
+version: 0.1
+modalities: [dslr]
+overwrite: True
+
+scene_filters:
+  - process_state_not: [conversion, finished]

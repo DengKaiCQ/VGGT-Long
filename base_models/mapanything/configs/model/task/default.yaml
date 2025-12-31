@@ -1,0 +1,27 @@
+# Ray Directions Encoder Config
+ray_dirs_encoder_config:
+  name: "ray_dirs_encoder"
+  in_chans: 3
+  encoder_str: "dense_rep_encoder"
+  apply_pe: false
+# Depth Encoder Config
+depth_encoder_config:
+  name: "depth_encoder"
+  in_chans: 1
+  encoder_str: "dense_rep_encoder"
+  apply_pe: false
+# Cam Rotation (Quats) Encoder Config
+cam_rot_encoder_config:
+  name: "cam_rot_quats_encoder"
+  in_chans: 4
+  encoder_str: "global_rep_encoder"
+# Cam Translation Encoder Config
+cam_trans_encoder_config:
+  name: "cam_trans_encoder"
+  in_chans: 3
+  encoder_str: "global_rep_encoder"
+# Scale Encoder Config
+scale_encoder_config:
+  name: "scale_encoder"
+  in_chans: 1
+  encoder_str: "global_rep_encoder"

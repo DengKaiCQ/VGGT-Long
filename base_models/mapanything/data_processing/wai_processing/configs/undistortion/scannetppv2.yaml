@@ -1,0 +1,19 @@
+root:  
+scene_meta_path: scene_meta_distorted.json
+use_kornia: False
+
+store_as_jpg: True # store as jpeg to save storage
+random_scene_processing_order: true
+
+scene_filters:
+  - exists: ${scene_meta_path}
+  - process_state_not: [undistortion, finished]
+
+frame_modalities:
+  - image_distorted
+  - anon_mask_distorted
+
+center_principal_point: True # set the principal point to the image center
+
+batch_size: 4
+num_workers: 4

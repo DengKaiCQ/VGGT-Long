@@ -1,0 +1,23 @@
+defaults:
+  - default
+
+# Overall Probability of Geometric Inputs
+overall_prob: 1
+# Dropout Probability of Geometric Inputs (for each sample across batch size and number of views)
+dropout_prob: 0
+# Probability of Geometric Inputs with Ray Directions
+ray_dirs_prob: 0
+# Probability of Geometric Inputs with Depths
+depth_prob: 0
+# Probability of Geometric Inputs with Camera Poses
+cam_prob: 1
+# Probability of sparsely sampling the high quality gt depth
+sparse_depth_prob: 0
+# Percentage of the valid depth to remove if the probability of using sparse depth is greater than 0 (Range: [0, 1])
+sparsification_removal_percent: 0
+# Probability for skipping input of the metric scale norm factor for the input metric high quality gt depth
+# If 0, the metric scale norm factor will be provided as input to the model for all the metric scale conditionings
+depth_scale_norm_all_prob: 0
+# Probability for skipping input of the metric scale norm factor for the input metric pose
+# If 0, the metric scale norm factor will be provided as input to the model for all the metric scale conditionings
+pose_scale_norm_all_prob: 1

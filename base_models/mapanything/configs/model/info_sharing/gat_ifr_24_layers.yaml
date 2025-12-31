@@ -1,0 +1,24 @@
+# Model type (Options: ["cross_attention", "global_attention", "alternating_attention"])
+model_type: "global_attention"
+# Model class type (Options: ["no_intermediate_features", "intermediate_features"])
+model_return_type: "intermediate_features"
+# Custom positional encoding (Options: ["RoPEfreq"], Callable Function, null)
+custom_positional_encoding: null
+# Module arguments
+module_args:
+  # Name of the info sharing module
+  name: "gat_24_layers_ifr"
+  # Maximum number of views for positional encoding
+  max_num_views: 1000
+  # Use random indices within range (1, max_num_views) for positional encoding of non reference views
+  use_rand_idx_pe_for_non_reference_views: True
+  # Indices of the intermediate features to be shared (indices start from 0)
+  indices: [11, 17]
+  # Normalize intermediate features
+  norm_intermediate: True
+  # Size string
+  size: "24_layers"
+  # Depth
+  depth: 24
+  # Flag to indicate whether to use gradient checkpointing
+  gradient_checkpointing: False

@@ -6,6 +6,9 @@
 
 # Modified from PyTorch3D, https://github.com/facebookresearch/pytorch3d
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/utils/rotation.py
+
 import torch
 import numpy as np
 import torch.nn.functional as F

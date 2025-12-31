@@ -1,0 +1,13 @@
+# String for model factory
+model_str: "pi3"
+# Model config
+model_config:
+  name: "pi3"
+  # Load pre-trained weights
+  load_pretrained_weights: true
+# Image Normalization Type
+data_norm_type: "identity"
+# Pi3 checkpoint is already loaded in the inference wrapper
+pretrained: null
+# Torch hub force reload
+torch_hub_force_reload: False

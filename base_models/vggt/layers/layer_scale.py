@@ -5,6 +5,9 @@
 
 # Modified from: https://github.com/huggingface/pytorch-image-models/blob/main/timm/models/vision_transformer.py#L103-L110
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/layers/layer_scale.py
+
 from typing import Union
 
 import torch

@@ -1,0 +1,26 @@
+# Pred depth from MVSAnywhere
+
+root:  # needs to be set via argument: root=<wai_dataset_root_path>
+
+out_path: covisibility/v0 # to enable some simple versioning
+
+scene_filters:
+  - exists: scene_meta.json
+  - process_state: [mvsanywhere, finished]
+  - process_state_not: [covisibility, finished]
+
+frame_modalities: # what to load for each frame
+  - pred_depth/mvsanywhere
+
+key_remap:
+  pred_depth/mvsanywhere: depth
+
+# downscale_factor: 4 # scale depth images down by this factor
+target_size: 224 # long-side of depth image to resize to
+depth_assoc_error_thres: 0.5 # maximum depth distance for points to be considered a match
+depth_assoc_error_temp: 0.5 # depth association error temperature; helps with far points
+depth_assoc_rel_error_thres: 0.005 # relative depth association error; helps with far points
+denominator_mode: full # how to divide the number of matches [valid_target_depth, all]
+
+batch_size: 4
+num_workers: 4

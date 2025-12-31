@@ -1,0 +1,18 @@
+# Model type (Options: ["cross_attention", "global_attention", "alternating_attention"])
+model_type: "cross_attention"
+# Model class type (Options: ["no_intermediate_features", "intermediate_features"])
+model_return_type: "intermediate_features"
+# Custom positional encoding (Options: ["RoPEfreq"], Callable Function, null)
+custom_positional_encoding: "RoPE100"
+# Module arguments
+module_args:
+  # Name of the info sharing module
+  name: "base_cat_ifr_dust3r"
+  # Number of views
+  num_views: 2
+  # Indices of the intermediate features to be shared (indices start from 0)
+  indices: [5, 8]
+  # Normalize intermediate features
+  norm_intermediate: False
+  # Load CroCo cross-attention transformer for DUSt3R Init
+  pretrained_checkpoint_path: '${machine.root_uniception_pretrained_checkpoints_dir}/info_sharing/cross_attn_transformer/Two_View_Cross_Attention_Transformer_CroCo.pth'
