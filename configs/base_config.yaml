@@ -1,6 +1,8 @@
 Weights:
-  model: 'Mapanything' # choose between 'VGGT' or 'Pi3' or 'Mapanything' or 'DA3'
+  model: 'Mapanything' # choose between 'VGGT' or 'Pi3' or 'Mapanything' or 'DA3' or 'AMB3R'
   VGGT: './weights/model.pt'
+  FastVGGT: './weights/model.pt'
+  AMB3R: './weights/AMB3R/amb3r.pt'
   Pi3:  './weights/Pi3/model.safetensors'
   Map:  './weights/MA'
 

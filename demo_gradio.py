@@ -746,6 +746,7 @@ def build_demo() -> gr.Blocks:
 
             <h3>Getting Started:</h3>
             <ol>
+                <li><strong>Select a Model:</strong> Select a foundation model you want to use for reconstruction from the dropdown menu. Optionally, you can customize the name of the reconstruction result folder.</li>
                 <li><strong>Upload Your Data:</strong> Use the "Upload Video" or "Upload Images" buttons on the left. Videos are sampled at ~5 FPS.</li>
                 <li><strong>Preview:</strong> Your uploaded images will appear in the gallery on the left.</li>
                 <li><strong>Start Reconstruction:</strong> Click the "Start Incremental Reconstruction" button to start the incremental 3D reconstruction process.</li>
@@ -789,7 +790,7 @@ def build_demo() -> gr.Blocks:
                 
                 # Model selection
                 model_selector = gr.Dropdown(
-                    choices=["VGGT", "Pi3", "Mapanything", "DA3"],
+                    choices=["VGGT", "FastVGGT", "Pi3", "Mapanything", "DA3", "AMB3R"],
                     value="VGGT",
                     label="Select Model",
                     interactive=True,

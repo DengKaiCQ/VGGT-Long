@@ -8,17 +8,17 @@
 
 
 
+# References:
+# MAE: https://github.com/facebookresearch/mae/blob/main/util/pos_embed.py
+# Transformer: https://github.com/tensorflow/models/blob/master/official/nlp/transformer/model_utils.py
+# MoCo v3: https://github.com/facebookresearch/moco-v3
+# --------------------------------------------------------
 import numpy as np
 
 import torch
 
 # --------------------------------------------------------
 # 2D sine-cosine position embedding
-# References:
-# MAE: https://github.com/facebookresearch/mae/blob/main/util/pos_embed.py
-# Transformer: https://github.com/tensorflow/models/blob/master/official/nlp/transformer/model_utils.py
-# MoCo v3: https://github.com/facebookresearch/moco-v3
-# --------------------------------------------------------
 def get_2d_sincos_pos_embed(embed_dim, grid_size, n_cls_token=0):
     """
     grid_size: int of the grid height and width

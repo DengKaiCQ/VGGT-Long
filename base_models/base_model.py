@@ -249,6 +249,101 @@ class VGGTAdapter(Base3DModel):
         }
 
 
+# ===================== AMB3R Adapter =====================
+# Adapts AMB3R (front-end VGGT + back-end point transformer) to the unified 3D interface.
+# ========================================================
+
+class AMB3RAdapter(Base3DModel):
+    def load(self):
+        """Load AMB3R model and its weights."""
+        print("Loading AMB3R model...")
+        
+        from amb3r.amb3r.model import AMB3R
+
+        # Initialize AMB3R main model
+        self.model = AMB3R(device=self.device, metric_scale=True)
+
+        # Load AMB3R weights
+        url = self.config["Weights"]["AMB3R"]
+        print(f"Loading AMB3R weights from: {url}")
+        # Use bf16 precision to match other models
+        self.model.load_weights(url, data_type="bf16", strict=True)
+
+        self.model.to(self.device)
+        self.model.eval()
+
+    def _load_images_as_numpy(self, image_paths: list):
+        """
+        Load image paths into a list of numpy arrays in RGB uint8 format.
+        """
+        import cv2
+
+        images = []
+        for p in image_paths:
+            img = cv2.imread(p, cv2.IMREAD_COLOR)
+            if img is None:
+                raise FileNotFoundError(f"Failed to read image: {p}")
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            images.append(img)
+        return images
+
+    def infer_chunk(self, image_paths: list) -> dict:
+        """
+        Run one-pass AMB3R inference (front-end + one back-end iteration)
+        and return a VGGTAdapter-compatible prediction dict.
+        """
+        torch.cuda.empty_cache()
+
+        # 1. Load images as numpy list
+        images_np = self._load_images_as_numpy(image_paths)
+        print(f"Loaded {len(images_np)} images for AMB3R")
+
+        if len(images_np) == 0:
+            raise ValueError("No images provided to AMB3RAdapter.infer_chunk")
+
+        # 2. Use middle frame as key view (aligns with VGGT-Long behaviour)
+        mid_idx = len(images_np) // 2
+
+        # 3. Use AMB3R's input_adapter to build frames dict
+        frames = self.model.input_adapter(images_np, keyview_idx=mid_idx)
+        frames_inner = frames["frames"]# B, 1, 3, H, W
+
+        # 4. Run AMB3R
+        with torch.no_grad():
+            with torch.cuda.amp.autocast(dtype=self.dtype):
+                predictions = self.model(frames_inner, iters=1)[1]
+
+        # 5. Pack outputs into unified dict
+        world_points = predictions["world_points"]
+        world_points_conf = predictions["world_points_conf"]
+
+        if "depth_metric" in predictions:
+            depth = predictions["depth_metric"]
+        else:
+            depth = predictions["depth"]
+
+        depth_conf = predictions.get("depth_conf", None)
+
+        # Use C2W pose as extrinsic to stay consistent with VGGTAdapter
+        extrinsic_c2w = predictions["pose"]
+        intrinsic = predictions.get("intrinsic", None)
+
+        images_out = predictions["images"]
+        
+        torch.cuda.empty_cache()
+
+        return {
+            "world_points": world_points,
+            "world_points_conf": world_points_conf,
+            "extrinsic": extrinsic_c2w,
+            "intrinsic": intrinsic,
+            "depth": depth,
+            "depth_conf": depth_conf,
+            "images": images_out,
+            "mask": None,
+        }
+
+
 # ===================== Pi3 Adapter =====================
 # Adapts Pi3 to the unified 3D inference interface.
 # =======================================================

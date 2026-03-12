@@ -150,7 +150,7 @@ pip install ./DPRetrieval
 
 #### Step 5 (Optional) : More Foundation Models Included & Visualization
 
-We have implemented incremental reconstruction for VGGT-Long/Pi3-Long/MapAnything-Long/DA3-Long and created a web-based demo visualization using gradio, which runs on a local port. In the demo's display window, you can observe the entire reconstruction process in real time. Additionally, we have enabled online alignment and accelerated the process using GPU, with the new GPU-accelerated code synchronized with the [DA3-Streaming](https://github.com/ByteDance-Seed/Depth-Anything-3/tree/main/da3_streaming). 
+We have implemented incremental reconstruction for VGGT-Long/FastVGGT-Long/Pi3-Long/MapAnything-Long/DA3-Long/AMB3R-Long and created a web-based demo visualization using gradio, which runs on a local port. In the demo's display window, you can observe the entire reconstruction process in real time. Additionally, we have enabled online alignment and accelerated the process using GPU, with the new GPU-accelerated code synchronized with the [DA3-Streaming](https://github.com/ByteDance-Seed/Depth-Anything-3/tree/main/da3_streaming). 
 
 First, you need to download the weights of other foundation models:
 
@@ -162,6 +162,14 @@ For MapAnything and DA3, you need to navigate to `base_models/mapanything` and `
 
 ```cmd
 pip install -e .
+```
+
+For AMB3R, you need to download the [checkpoint](https://drive.google.com/file/d/14x0WW2rUE_he2hUEouP6ywSRnlJDeLel/view?usp=sharing) in person and place it under ./weights/AMB3R after installing it into your environment:
+
+```cmd
+pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.0+cu118.html
+pip install "git+https://github.com/facebookresearch/pytorch3d.git@V0.7.8" --no-build-isolation
+pip install flash-attn==2.7.3 --no-build-isolation
 ```
 
 

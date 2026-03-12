@@ -1,0 +1,20 @@
+numpy==1.26.4
+opencv-python==4.10.0.84
+xformers==0.0.28.post2
+open3d==0.18.0
+huggingface-hub==0.28.1
+einops==0.8.0
+trimesh==4.4.9
+pillow==10.3.0
+gdown==5.2.0
+imageio[ffmpeg]==2.35.1
+spconv-cu118==2.3.8
+timm==0.6.7
+omegaconf==2.3.0
+evo==1.31.1
+pytoml==0.1.21
+tensorboard==2.18.0
+scikit-image==0.24.0
+dill==0.3.8
+easydict==1.13
+utils3d @ git+https://github.com/EasternJournalist/utils3d.git@c5daf6f6c244d251f252102d09e9b7bcef791a38

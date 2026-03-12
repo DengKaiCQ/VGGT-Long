@@ -1,0 +1,71 @@
+huggingface_hub
+hydra-core
+natsort
+opencv-python-headless==4.10.0.84
+orjson
+pillow-heif
+plyfile
+python-box
+requests
+rerun-sdk~=0.24.1
+safetensors
+tensorboard
+tqdm
+trimesh
+uniception==0.1.6
+
+[all]
+mapanything[anycalib]
+mapanything[colmap]
+mapanything[data]
+mapanything[depth-anything-3]
+mapanything[dev]
+mapanything[dust3r]
+mapanything[gradio]
+mapanything[mast3r]
+mapanything[must3r]
+mapanything[pow3r]
+mapanything[radio]
+mapanything[rmvd]
+
+[anycalib]
+anycalib@ git+https://github.com/javrtg/AnyCalib.git@main#egg=anycalib
+
+[colmap]
+lightglue@ git+https://github.com/cvg/LightGlue.git
+pycolmap==3.10.0
+
+[data]
+pandas
+
+[depth-anything-3]
+depth-anything-3@ git+https://github.com/Nik-V9/depth-anything-3.git@main#egg=depth-anything-3
+
+[dev]
+pre-commit
+pytest
+pytest-cov
+ruff
+
+[dust3r]
+croco@ git+https://github.com/naver/croco.git@croco_module#egg=croco
+dust3r@ git+https://github.com/naver/dust3r.git@dust3r_setup#egg=dust3r
+
+[gradio]
+gradio
+spaces
+
+[mast3r]
+mast3r@ git+https://github.com/Nik-V9/mast3r.git@main#egg=mast3r
+
+[must3r]
+must3r@ git+https://github.com/naver/must3r.git@main#egg=must3r
+
+[pow3r]
+pow3r@ git+https://github.com/Nik-V9/pow3r.git@main#egg=pow3r
+
+[radio]
+timm
+
+[rmvd]
+rmvd@ git+https://github.com/infinity1096/robustmvd.git@master#egg=rmvd

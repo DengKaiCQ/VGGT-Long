@@ -17,7 +17,9 @@ prettytable
 pytorch-lightning
 pytorch-metric-learning
 torchmetrics
+
 gradio==5.17.1
+
 trimesh
 matplotlib
 scipy

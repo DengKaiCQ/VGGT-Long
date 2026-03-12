@@ -10,6 +10,7 @@
 import logging
 import os
 import warnings
+import time
 
 from torch import Tensor
 from torch import nn
@@ -49,6 +50,7 @@ class Attention(nn.Module):
 
     def forward(self, x: Tensor, pos=None) -> Tensor:
         B, N, C = x.shape
+        
         qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
         q, k, v = qkv.unbind(0)
 
@@ -70,6 +72,7 @@ class Attention(nn.Module):
         x = x.transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
         x = self.proj_drop(x)
+        
         return x
 
 

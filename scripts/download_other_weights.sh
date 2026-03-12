@@ -33,8 +33,11 @@ curl -L "$DA3_URL" -o "./model.safetensors"
 curl -L "$DA3_CONFIG_URL" -o "./config.json"
 
 cd ..
+mkdir AMB3R
 
-# you will see 3 folders under `./weights` when finished
+cd ..
+
+# you will see 4 folders under `./weights` when finished
 # - Pi3
 #    - model.safetensors            
 # - MA
@@ -43,3 +46,4 @@ cd ..
 # - DA3
 #    - model.safetensors  
 #    - config.json  
+# - AMB3R

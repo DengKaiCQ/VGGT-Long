@@ -1,0 +1,19 @@
+--- modules.py.orig	2022-12-23 10:47:59.948511174 +0100
++++ modules.py	2022-12-23 10:54:52.717960550 +0100
+@@ -54,12 +54,14 @@
+     # Make sure the number of depth hypothesis has a factor of 2
+     assert nhypothesis_init%2 == 0
+ 
+-    depth_hypos = torch.range(depth_min[0],depth_max[0],depth_interval_mean).unsqueeze(0)
++    steps = torch.arange(nhypothesis_init).float().to(depth_range.device)
++    depth_hypos = (depth_min[0] + steps * (depth_range) / (nhypothesis_init - 1)).unsqueeze(0)
+ 
+     # Assume depth range is consistent in one batch.
+     for b in range(1,batchSize):
+         depth_range = depth_max[b]-depth_min[b]
+-        depth_hypos = torch.cat((depth_hypos,torch.range(depth_min[0],depth_max[0],depth_interval_mean).unsqueeze(0)),0)
++        depth_hypos_b = (depth_min[0] + steps * (depth_range) / (nhypothesis_init - 1)).unsqueeze(0)
++        depth_hypos = torch.cat((depth_hypos, depth_hypos_b),0)
+ 
+     return depth_hypos.cuda()
+ 

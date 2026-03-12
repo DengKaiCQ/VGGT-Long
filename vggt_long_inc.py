@@ -12,6 +12,8 @@ from PIL import Image
 from tqdm.auto import tqdm
 import sys
 
+from vggt.utils import global_hw
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 base_models_path = os.path.join(current_dir, 'base_models')
 if base_models_path not in sys.path:
@@ -38,7 +40,7 @@ from vggt.utils.geometry import closed_form_inverse_se3, unproject_depth_map_to_
 from vggt.utils.load_fn import load_and_preprocess_images
 from vggt.utils.pose_enc import pose_encoding_to_extri_intri
 
-from base_models.base_model import VGGTAdapter, Pi3Adapter, MapAnythingAdapter, DA3Adapter
+from base_models.base_model import VGGTAdapter, Pi3Adapter, MapAnythingAdapter, DA3Adapter, AMB3RAdapter
 
 from LoopModels.LoopModel import LoopDetector
 from LoopModelDBoW.retrieval.retrieval_dbow import RetrievalDBOW
@@ -147,12 +149,18 @@ class VGGT_Long_Inc:
         print("Loading model...")
         if self.config['Weights']['model'] == 'VGGT':
             self.model = VGGTAdapter(self.config)
+            global_hw.update_acc_false()
+        elif self.config['Weights']['model'] == 'FastVGGT':
+            self.model = VGGTAdapter(self.config)
+            global_hw.update_acc_true()
         elif self.config['Weights']['model'] == 'Pi3':
             self.model = Pi3Adapter(self.config)
         elif self.config['Weights']['model'] == 'Mapanything':
             self.model = MapAnythingAdapter(self.config)
         elif self.config['Weights']['model'] == 'DA3':
             self.model = DA3Adapter(self.config)
+        elif self.config['Weights']['model'] == 'AMB3R':
+            self.model = AMB3RAdapter(self.config)
         else:
             raise ValueError(f"Unsupported model: {self.config['Weights']['model']}")
         

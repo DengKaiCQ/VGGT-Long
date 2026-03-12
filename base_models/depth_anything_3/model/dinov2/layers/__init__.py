@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 # from .attention import MemEffAttention
-
 # References:
 #   https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/src/depth_anything_3/model/dinov2/layers/__init__.py
 

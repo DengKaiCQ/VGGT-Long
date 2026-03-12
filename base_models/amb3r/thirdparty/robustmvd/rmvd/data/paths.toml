@@ -1,0 +1,16 @@
+[eth3d]
+    root = '../data/robustmvd/eval_datasets/eth3d/'
+
+[kitti]
+    root = '../data/robustmvd/eval_datasets/kitti/'
+
+[dtu]
+    root = '../data/robustmvd/eval_datasets/dtu/'
+
+[scannet]
+    root = '../data/robustmvd/eval_datasets/scannet/'
+
+[tanks_and_temples]
+    root = '../data/robustmvd/eval_datasets/tnt/'
+
+

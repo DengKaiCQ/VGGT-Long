@@ -1,5 +1,4 @@
 # Optional config for better memory efficiency
-
 # References:
 #   https://github.com/facebookresearch/map-anything/blob/main/inf.py
 
@@ -16,10 +15,10 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Init model - This requires internet access or the huggingface hub cache to be pre-downloaded
 # For Apache 2.0 license model, use "facebook/map-anything-apache"
-model = MapAnything.from_pretrained("../../weights/MA").to(device)
+model = MapAnything.from_pretrained("/home/syoesnoto/桌面/WORK/VGGT-Long-ZJZ/weights/MA").to(device)
 
 # Load and preprocess images from a folder or list of paths
-images = "/path/to/your/images"  # or ["path/to/img1.jpg", "path/to/img2.jpg", ...]
+images = "/home/syoesnoto/桌面/WORK/data/60"  # or ["path/to/img1.jpg", "path/to/img2.jpg", ...]
 views = load_images(images)
 
 # Run inference
