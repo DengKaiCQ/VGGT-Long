@@ -100,7 +100,6 @@ class VGGT_Long:
 
         self.chunk_size = self.config['Model']['chunk_size']
         self.overlap = self.config['Model']['overlap']
-        self.conf_threshold = 1.5
         self.seed = 42
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.dtype = torch.bfloat16 if torch.cuda.get_device_capability()[0] >= 8 else torch.float16
@@ -575,8 +574,8 @@ class VGGT_Long:
                     colors=colors_first,  # shape: (H, W, 3)
                     confs=confs_first,  # shape: (H, W)
                     output_path=ply_path_first,
-                    conf_threshold=np.mean(confs_first) * self.config['Model']['Pointcloud_Save'][
-                        'conf_threshold_coef'],
+                    conf_threshold=(np.mean(confs_first) * self.config['Model']['Pointcloud_Save']['conf_threshold_coef']
+                        if self.config['Model']['Pointcloud_Save'].get('use_conf_filter', True) else -1.0),
                     sample_ratio=self.config['Model']['Pointcloud_Save']['sample_ratio']
                 )
 
@@ -595,7 +594,8 @@ class VGGT_Long:
                 colors=colors,  # shape: (H, W, 3)
                 confs=confs,  # shape: (H, W)
                 output_path=ply_path,
-                conf_threshold=np.mean(confs) * self.config['Model']['Pointcloud_Save']['conf_threshold_coef'],
+                conf_threshold=(np.mean(confs) * self.config['Model']['Pointcloud_Save']['conf_threshold_coef']
+                    if self.config['Model']['Pointcloud_Save'].get('use_conf_filter', True) else -1.0),
                 sample_ratio=self.config['Model']['Pointcloud_Save']['sample_ratio']
             )
 

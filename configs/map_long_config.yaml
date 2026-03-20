@@ -1,0 +1,28 @@
+inherit_from: "configs/base_config.yaml"
+
+Weights:
+  model: 'Mapanything'  # Use MapAnything foundation model
+  # Map: './weights/map_anything'  # Path to MapAnything weights
+  Map: 'facebook/map-anything'    # Other options: 'facebook/map-anything-apache' or 'facebook/map-anything-v1' or 'facebook/map-anything-apache-v1'
+
+Model:
+  chunk_size: 60
+  overlap: 30
+  loop_chunk_size: 20 # imgs of loop chunk = 2 * loop_chunk_size
+  loop_enable: True
+  useDBoW: False
+  delete_temp_files: True
+  align_method: 'numba' # 'numba' or 'numpy', use 'numba' would be faster
+  using_sim3: False # Using SIM(3) alignment if True, while using SE(3) alignment if False,mapanything need se3
+  reference_frame_mid: False
+  # If reference_frame_mid == True, use the middle frame within the chunk as the
+  # reference frame to alleviate the scale drift when loop closure is not available.
+  # Disable it for now cuz i found some bugs related to this feature [by deng on 09 Oct].
+  calib: False # only mapanything; get k from kitti for input
+  h: 720 # input h
+  w: 1280 # input w
+
+  Pointcloud_Save:
+    sample_ratio: 1.0     # Downsample ratio for final point cloud - TODO: Check if ok.
+    conf_threshold_coef: 0.75 # Confidence threshold coefficient
+    use_conf_filter: True
