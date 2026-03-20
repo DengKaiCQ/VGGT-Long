@@ -1,0 +1,19 @@
+stage: # set stage via CLI
+root:  # path of wai-formatted dataset
+
+gpus: 0
+cpus: 10
+mem: 20
+scenes_per_job: 4000
+conda_env: # pass the name of our conda environment
+nodelist: 
+
+stages:
+  conversion:
+    script: conversion/ase.py
+    config: conversion/ase.yaml
+  undistortion: null
+  covisibility:
+    script: covisibility.py
+    config: covisibility/covisibility_gt_depth_224x224.yaml
+    gpus: 1

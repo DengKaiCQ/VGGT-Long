@@ -1,0 +1,28 @@
+# model
+
+device: 'cuda:0'
+
+# Mapping
+map_init_window: 20
+map_every: 8
+
+weighted_average_alignment: true
+
+max_keyframes: 10
+min_keyframes: 7
+top_k_keyframes: 4
+bridge_keyframes: 1
+
+keyframe_threshold: 0.15
+keyframe_resample_threshold: 0.4
+keyframe_resample_threshold_max_f: 1.2
+keyframe_resample_threshold_max_b: 1.2
+keyframe_resample_threshold_min: 0.1
+
+
+
+# AMB3R params, you do not need this if you use your own model
+conf_thresh_exp_scale: 0.5
+conf_threshold_front: 2.7
+conf_threshold_back: 1.0
+blend: true

@@ -213,7 +213,7 @@ class LoopDetector:
         if self.loop_closures is None:
             self.find_loop_closures()
             
-        with open(self.output, 'w') as f:
+        with open(self.output, 'w', encoding='utf-8') as f:
             f.write("# Loop Detection Results (index1, index2, similarity)\n")
             if self.use_nms:
                 f.write(f"# NMS filtering applied, threshold: {self.nms_threshold}\n")

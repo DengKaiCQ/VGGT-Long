@@ -1,0 +1,39 @@
+defaults:
+  - resolution_options: default
+  - ase_wai: default
+  - blendedmvs_wai: default
+  - dl3dv_wai: default
+  - dynamicreplica_wai: default
+  - eth3d_wai: default
+  - megadepth_wai: default
+  - mpsd_wai: default
+  - mvs_synth_wai: default
+  - paralleldomain4d_wai: default
+  - sailvos3d_wai: default
+  - scannetpp_wai: default
+  - spring_wai: default
+  - tav2_wb_wai: default
+  - unrealstereo4k_wai: default
+
+# Training Set, For example: BlendedMVS(split='train', resolution=(512, 384), transform=...)
+train_dataset: ???
+# Validation Set
+test_dataset: "[null]"
+# Number of workers for dataloader
+num_workers: 12
+# Default resolution for training
+resolution_train: ???
+# Default resolution for validation
+resolution_val: ???
+# Number of views parameter for multi-view datasets
+num_views: 2
+# Use a centered principal point for all images
+principal_point_centered: false
+# Default config for multi-view datasets
+train:
+  # If True, the number of views can vary from batch to batch. The maximum number of views is num_views and minimum is 2. (On by default for N-view training)
+  variable_num_views: true
+val:
+  variable_num_views: false
+test:
+  variable_num_views: false

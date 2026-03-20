@@ -16,6 +16,7 @@ import torch
 from torch import nn, Tensor
 
 from .attention import Attention
+from .fast_attention import FastAttention
 from .drop_path import DropPath
 from .layer_scale import LayerScale
 from .mlp import Mlp
@@ -40,26 +41,41 @@ class Block(nn.Module):
         act_layer: Callable[..., nn.Module] = nn.GELU,
         norm_layer: Callable[..., nn.Module] = nn.LayerNorm,
         attn_class: Callable[..., nn.Module] = Attention,
+        fast_attn_class: Callable[..., nn.Module] = FastAttention,
         ffn_layer: Callable[..., nn.Module] = Mlp,
         qk_norm: bool = False,
         fused_attn: bool = True,  # use F.scaled_dot_product_attention or not
         rope=None,
+        is_global=False,
     ) -> None:
         super().__init__()
 
         self.norm1 = norm_layer(dim)
-
-        self.attn = attn_class(
-            dim,
-            num_heads=num_heads,
-            qkv_bias=qkv_bias,
-            proj_bias=proj_bias,
-            attn_drop=attn_drop,
-            proj_drop=drop,
-            qk_norm=qk_norm,
-            fused_attn=fused_attn,
-            rope=rope,
-        )
+        
+        if is_global:
+            self.attn = fast_attn_class(
+                dim,
+                num_heads=num_heads,
+                qkv_bias=qkv_bias,
+                proj_bias=proj_bias,
+                attn_drop=attn_drop,
+                proj_drop=drop,
+                qk_norm=qk_norm,
+                fused_attn=fused_attn,
+                rope=rope,
+            )
+        else:
+            self.attn = attn_class(
+                dim,
+                num_heads=num_heads,
+                qkv_bias=qkv_bias,
+                proj_bias=proj_bias,
+                attn_drop=attn_drop,
+                proj_drop=drop,
+                qk_norm=qk_norm,
+                fused_attn=fused_attn,
+                rope=rope,
+            )
 
         self.ls1 = LayerScale(dim, init_values=init_values) if init_values else nn.Identity()
         self.drop_path1 = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()

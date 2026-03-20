@@ -4,6 +4,9 @@
 # found in the LICENSE file in the root directory of this source tree.
 
 
+# References:
+#   https://github.com/yyfz/Pi3/blob/main/pi3/models/dinov2/utils/dtype.py
+
 from typing import Dict, Union
 
 import numpy as np

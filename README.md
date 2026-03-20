@@ -36,6 +36,8 @@ https://github.com/user-attachments/assets/c7b9872c-f4ce-4a4e-911a-6ddcf039f871
 
 ### **Updates**
 
+`[20 Mar 2026]` 1. We used `Gradio` to build a visual web interface running on a local port, allowing users to perform incremental reconstruction through a graphical interface and view user-friendly visualization results. 2. We added `FastVGGT`, `DA3`, and `AMB3R` to the original architecture. The current pipeline can be extended to more future 3D foundation models.
+
 `[12 Dec 2025]` 1. We refactored the original architecture to support arbitrary foundation models, including `VGGT`, `Pi3`, and `MapAnything`. The current pipeline can be extended to future 3D foundation models easily. 2. Leveraging `MapAnything`'s multimodal inputs and its ability to predict metric/real scale, `Map-Long` achieved a great performance in the setting of metric scale with $\text{SE}(3)$ alignment.
 
 `[05 Nov 2025]` We have uploaded the input images captured by a mobile phone in the demo on Google Drive, as we have noticed that such complex large-scale scenes seem to be quite rare on other public datasets if you need them for your own demo. See part "Self-Collected Dataset Used in Demo Video" in `README.md`.
@@ -161,7 +163,32 @@ pip install ./DPRetrieval
 
 </details>
 
-#### Step 5 (Optional) : Install mapanything as a package into the  vggt-long environment,if you want to use mapanything.[Link](https://github.com/facebookresearch/map-anything?tab=readme-ov-file#installation)
+
+#### Step 5 (Optional) : More Foundation Models Included & Visualization
+
+We have implemented incremental reconstruction for VGGT-Long/FastVGGT-Long/Pi3-Long/MapAnything-Long/DA3-Long/AMB3R-Long and created a web-based demo visualization using gradio, which runs on a local port. In the demo's display window, you can observe the entire reconstruction process in real time. Additionally, we have enabled online alignment and accelerated the process using GPU, with the new GPU-accelerated code synchronized with the [DA3-Streaming](https://github.com/ByteDance-Seed/Depth-Anything-3/tree/main/da3_streaming). 
+
+First, you need to download the weights of other foundation models:
+
+```cmd
+bash ./scripts/download_other_weights.sh
+```
+
+For MapAnything and DA3, you need to navigate to `base_models/mapanything` and `base_models/depth_anything3` respectively and run the following cmd to install them into your environment:
+
+```cmd
+pip install -e .
+```
+
+For AMB3R, you need to download the [checkpoint](https://drive.google.com/file/d/14x0WW2rUE_he2hUEouP6ywSRnlJDeLel/view?usp=sharing) in person and place it under ./weights/AMB3R after installing it into your environment:
+
+```cmd
+pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.0+cu118.html
+pip install "git+https://github.com/facebookresearch/pytorch3d.git@V0.7.8" --no-build-isolation
+pip install flash-attn==2.7.3 --no-build-isolation
+```
+
+
 
 ### 🚀 3 - Running the code
 
@@ -183,6 +210,12 @@ You may run the following cmd if you got videos before `python vggt_long.py`.
 ```
 mkdir ./extract_images
 ffmpeg -i your_video.mp4 -vf "fps=5,scale=518:-1" ./extract_images/frame_%06d.png
+```
+
+You can run the following cmd to launch the web visualization (defaults to local port 8080):
+
+```cmd
+python app.py
 ```
 
 ### 🛠️ 4 - Possible Problems You May Encounter

@@ -4,6 +4,9 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/utils/load_fn.py
+
 import torch
 from PIL import Image
 from torchvision import transforms as TF

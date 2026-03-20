@@ -14,6 +14,9 @@
 #         https://github.com/naver-ai/rope-vit
 
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/layers/rope.py
+
 import numpy as np
 import torch
 import torch.nn as nn

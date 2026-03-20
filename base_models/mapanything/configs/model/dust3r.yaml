@@ -1,0 +1,23 @@
+# String for model factory
+model_str: "dust3r"
+# Model config
+model_config:
+  name: "dust3r"
+  # Checkpoint path
+  ckpt_path: "${root_pretrained_checkpoints_dir}/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth"
+  # Scene graph for BA
+  scene_graph: "complete"
+  # Pairwise inference batch size
+  inference_batch_size: 32
+  # Global optim schedule
+  global_optim_schedule: "cosine"
+  # Global optim lr
+  global_optim_lr: 0.01
+  # Number of iterations for global optimization
+  global_optim_niter: 300
+# Image Normalization Type
+data_norm_type: "dust3r"
+# DUSt3R checkpoint is already loaded in the inference wrapper
+pretrained: null
+# Torch hub force reload
+torch_hub_force_reload: false

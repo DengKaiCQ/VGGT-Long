@@ -1,3 +1,6 @@
+# References:
+#   https://github.com/yyfz/Pi3/blob/main/pi3/utils/geometry.py
+
 import numpy as np
 import torch
 import torch.nn.functional as F

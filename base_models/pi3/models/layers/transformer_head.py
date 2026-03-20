@@ -1,3 +1,6 @@
+# References:
+#   https://github.com/yyfz/Pi3/blob/main/pi3/models/layers/transformer_head.py
+
 from .attention import FlashAttentionRope
 from .block import BlockRope
 from ..dinov2.layers import Mlp

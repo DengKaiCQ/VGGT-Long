@@ -1,0 +1,27 @@
+# Camera Frame Pointmap + Global Camera Pose (Trans + Quats) + Confidence + Mask + Scene-wide Metric Scaling Factor
+input_dim: 5
+scene_rep_dim: 3
+type: "campointmap+pose+confidence+mask"
+scene_rep_type: "campointmap+pose"
+dense_pred_init_dict:
+  name: "campointmap+pose+confidence+mask+scale"
+  pointmap_mode: "z_exp"
+  pointmap_vmin: ${special_float:"-inf"}
+  pointmap_vmax: ${special_float:"inf"}
+  confidence_type: "exp"
+  confidence_vmin: 1
+  confidence_vmax: ${special_float:"inf"}
+pose_pred_init_dict:
+  name: "campointmap+pose+confidence+mask+scale"
+  cam_trans_mode: "linear"
+  cam_trans_vmin: ${special_float:"-inf"}
+  cam_trans_vmax: ${special_float:"inf"}
+  quaternions_mode: "linear"
+  quaternions_normalize: true
+  quaternions_vmin: ${special_float:"-inf"}
+  quaternions_vmax: ${special_float:"inf"}
+scale_pred_init_dict:
+  name: "campointmap+pose+confidence+mask+scale"
+  mode: "exp"
+  vmin: 1e-08
+  vmax: ${special_float:"inf"}

@@ -4,6 +4,9 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/dependency/vggsfm_utils.py
+
 import logging
 import warnings
 from typing import Dict, List, Optional, Tuple, Union
@@ -69,7 +72,17 @@ def generate_rank_by_dino(
     images = F.interpolate(images, (image_size, image_size), mode="bilinear", align_corners=False)
 
     # Load DINO model
-    dino_v2_model = torch.hub.load("facebookresearch/dinov2", model_name)
+    import os
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    dinov2_path = os.path.abspath(os.path.join(current_dir, "../../../../LoopModels/dinov2"))
+    
+    if os.path.exists(dinov2_path):
+        print(f"Loading dinov2 from local path: {dinov2_path}")
+        dino_v2_model = torch.hub.load(dinov2_path, model_name, source='local')
+    else:
+        print(f"Warning: Local dinov2 not found at {dinov2_path}, falling back to torch hub")
+        dino_v2_model = torch.hub.load("facebookresearch/dinov2", model_name)
+
     dino_v2_model.eval()
     dino_v2_model = dino_v2_model.to(device)
 

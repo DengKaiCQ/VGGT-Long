@@ -489,7 +489,15 @@ def process_loop_list(chunk_index, loop_list, half_window=10):
       - range1, range2: Frame range tuples (start, end).
     """
     results = []
-    for idx1, idx2 in loop_list:
+    for item in loop_list:
+        if len(item) == 2:
+            idx1, idx2 = item
+        elif len(item) == 3:
+            idx1, idx2, _ = item
+        else:
+            print(f"Skipping invalid loop pair: {item}")
+            continue
+
         try:
             chunk_idx1_0based = find_chunk_index(chunk_index, idx1)
             chunk1 = chunk_index[chunk_idx1_0based]
@@ -534,9 +542,19 @@ def merge_ply_files(input_dir, output_path):
     """
 
     input_files = sorted(glob.glob(os.path.join(input_dir, '*_pcd.ply')))
+    # Filter out combined_pcd.ply and ensure we only merge chunk files (e.g., 0_pcd.ply)
+    filtered_files = []
+    output_filename = os.path.basename(output_path)
+    for f in input_files:
+        if os.path.basename(f) == output_filename:
+            continue
+        # Check if filename starts with digit (chunk index)
+        if os.path.basename(f).split('_')[0].isdigit():
+            filtered_files.append(f)
+    input_files = filtered_files
     
     if not input_files:
-        print("No PLY files found")
+        print("No chunk PLY files found")
         return
     
     idx_file = 0
@@ -662,16 +680,17 @@ def huber_loss(r, delta):
     abs_r = np.abs(r)
     return np.where(abs_r <= delta, 0.5 * r**2, delta * (abs_r - 0.5 * delta))
 
-def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9, using_sim3 = True):
+def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9, align_method = 'sim3'):
     """
     src:  (Nx3)
     tgt:  (Nx3)
     init_weights:  (N,)
     """
-    if using_sim3:
+    if align_method == 'sim3':
         s, R, t = weighted_estimate_sim3(src, tgt, init_weights)
-    else:
+    elif align_method == 'se3' or align_method == 'scale+se3':
         s, R, t = weighted_estimate_se3(src, tgt, init_weights)
+
     prev_error = float('inf')
     
     for iter in range(max_iters):
@@ -689,10 +708,10 @@ def robust_weighted_estimate_sim3(src, tgt, init_weights, delta=0.1, max_iters=2
         
         combined_weights /= (np.sum(combined_weights) + 1e-12)
         
-        if using_sim3:
-            s_new, R_new, t_new = weighted_estimate_sim3(src, tgt, combined_weights)
-        else:
+        if align_method == 'se3':
             s_new, R_new, t_new = weighted_estimate_se3(src, tgt, combined_weights)
+        elif align_method == 'sim3' or align_method == 'scale+se3':
+            s_new, R_new, t_new = weighted_estimate_sim3(src, tgt, combined_weights)
 
         param_change = np.abs(s_new - s) + np.linalg.norm(t_new - t)
         rot_angle = np.arccos(min(1.0, max(-1.0, (np.trace(R_new @ R.T) - 1)/2)))
@@ -766,12 +785,12 @@ def _weighted_estimate_sim3_numba(source_points, target_points, weights):
 
     return s, mu_src, mu_tgt, H
 
-def weighted_estimate_sim3_numba(source_points, target_points, weights, using_sim3 = True):
-    if using_sim3:
+def weighted_estimate_sim3_numba(source_points, target_points, weights, align_method = 'sim3'):
+    if align_method == 'sim3':
         s, mu_src, mu_tgt, H = _weighted_estimate_sim3_numba(source_points, target_points, weights)
-    else:
+    elif align_method == 'se3' or align_method == 'scale+se3':
         s, mu_src, mu_tgt, H = _weighted_estimate_se3_numba(source_points, target_points, weights)
-
+    
     if s < 0:
         raise ValueError("Total weight too small for meaningful estimation")
 
@@ -784,10 +803,10 @@ def weighted_estimate_sim3_numba(source_points, target_points, weights, using_si
         Vt[2, :] *= -1
         R = Vt.T @ U.T
 
-    if using_sim3:
-        t = mu_tgt - s * R @ mu_src
-    else:
+    if align_method == 'se3' or align_method == 'scale+se3':
         t = mu_tgt - R @ mu_src
+    else:
+        t = mu_tgt - s * R @ mu_src
 
     return s, R, t
 
@@ -826,12 +845,12 @@ def apply_transformation_numba(src, s, R, t):
         transformed[i] = s * (R @ p) + t
     return transformed
 
-def robust_weighted_estimate_sim3_numba(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9, using_sim3 = True):
+def robust_weighted_estimate_sim3_numba(src, tgt, init_weights, delta=0.1, max_iters=20, tol=1e-9, align_method = 'sim3'):
     src = src.astype(np.float32)
     tgt = tgt.astype(np.float32)
     init_weights = init_weights.astype(np.float32)
 
-    s, R, t = weighted_estimate_sim3_numba(src, tgt, init_weights, using_sim3 = using_sim3)
+    s, R, t = weighted_estimate_sim3_numba(src, tgt, init_weights, align_method = align_method)
 
     prev_error = float('inf')
 
@@ -845,7 +864,7 @@ def robust_weighted_estimate_sim3_numba(src, tgt, init_weights, delta=0.1, max_i
         combined_weights = init_weights * huber_weights
         combined_weights /= (np.sum(combined_weights) + 1e-12)
 
-        s_new, R_new, t_new = weighted_estimate_sim3_numba(src, tgt, combined_weights, using_sim3 = using_sim3)
+        s_new, R_new, t_new = weighted_estimate_sim3_numba(src, tgt, combined_weights, align_method = align_method)
 
         param_change = np.abs(s_new - s) + np.linalg.norm(t_new - t)
         rot_angle = np.arccos(min(1.0, max(-1.0, (np.trace(R_new @ R.T) - 1)/2)))
@@ -913,15 +932,217 @@ def warmup_numba():
     print("Numba warm-up complete.\n")
 
 # ===== Speed Up End =====
+    
+# ===== Scale precompute begin =====
 
+from sklearn.linear_model import RANSACRegressor
+from sklearn.linear_model import LinearRegression
 
+def compute_scale_ransac(
+    depth1, depth2, conf1, conf2,mask, conf_threshold_ratio=0.1, max_samples=10000
+):
+    """
+    Args:
+        depth1: (n1, h, w)
+        depth2: (n2, h, w)
+        conf1: (n1, h, w)
+        conf2: (n2, h, w)
 
+    """
 
-def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, mask, conf_threshold, config):
+    depth1_flat = depth1.reshape(-1)
+    depth2_flat = depth2.reshape(-1)
+    conf1_flat = conf1.reshape(-1)
+    conf2_flat = conf2.reshape(-1)
+
+    conf_threshold = max(
+        np.median(conf1_flat) * conf_threshold_ratio,
+        np.median(conf2_flat) * conf_threshold_ratio,
+        1e-6,
+    )
+
+    valid_mask = (
+        (conf1_flat > conf_threshold)
+        & (conf2_flat > conf_threshold)
+        & (depth1_flat > 1e-3)
+        & (depth2_flat > 1e-3)
+        & (depth1_flat < 100)
+        & (depth2_flat < 100)
+    )
+
+    if mask is not None:
+        mask = mask.reshape(-1)
+        valid_mask = valid_mask & mask
+
+    if np.sum(valid_mask) < 100:
+        print(f"Warning: Only {np.sum(valid_mask)} valid points, using default scale 1.0")
+        return 1.0, 0.0
+
+    valid_depth1 = depth1_flat[valid_mask]
+    valid_depth2 = depth2_flat[valid_mask]
+
+    if len(valid_depth1) > max_samples:
+        indices = np.random.choice(len(valid_depth1), max_samples, replace=False)
+        valid_depth1 = valid_depth1[indices]
+        valid_depth2 = valid_depth2[indices]
+
+    X = valid_depth2.reshape(-1, 1)
+    y = valid_depth1
+
+    base_estimator = LinearRegression(fit_intercept=False)
+    ransac = RANSACRegressor(
+        estimator=base_estimator,
+        max_trials=1000,
+        min_samples=max(10, len(X) // 100),
+        residual_threshold=0.1,
+        random_state=42,
+    )
+
+    ransac.fit(X, y)
+    scale_factor = ransac.estimator_.coef_[0]
+    inlier_mask = ransac.inlier_mask_
+    inlier_ratio = np.sum(inlier_mask) / len(inlier_mask)
+
+    print(f"RANSAC scale: {scale_factor:.6f}, inlier ratio: {inlier_ratio:.4f}")
+
+    if 0.1 < scale_factor < 10.0:
+        return scale_factor, inlier_ratio
+    else:
+        print(f"Warning: Unreasonable scale {scale_factor}, using 1.0")
+        return 1.0, inlier_ratio
+
+            
+def compute_scale_weighted(depth1, depth2, conf1, conf2,mask, conf_threshold_ratio=0.1,
+                          weight_power=2.0, robust_quantile=0.9):
+    """
+    Args:
+        depth1: (n1, h, w)
+        depth2: (n2, h, w)
+        conf1: (n1, h, w)
+        conf2: (n2, h, w)
+    """
+    depth1_flat = depth1.reshape(-1)
+    depth2_flat = depth2.reshape(-1)
+    conf1_flat = conf1.reshape(-1)
+    conf2_flat = conf2.reshape(-1)
+    
+    conf_threshold = max(np.median(conf1_flat) * conf_threshold_ratio,
+                        np.median(conf2_flat) * conf_threshold_ratio,
+                        1e-6)
+    
+    valid_mask = (conf1_flat > conf_threshold) & (conf2_flat > conf_threshold) & \
+                 (depth1_flat > 1e-3) & (depth2_flat > 1e-3) & \
+                 (depth1_flat < 100) & (depth2_flat < 100)
+
+    if mask is not None:
+        mask = mask.reshape(-1)
+        valid_mask = valid_mask & mask
+
+    if np.sum(valid_mask) < 100:
+        print(f"Warning: Only {np.sum(valid_mask)} valid points, using default scale 1.0")
+        return 1.0, 0.0
+    
+    valid_depth1 = depth1_flat[valid_mask]
+    valid_depth2 = depth2_flat[valid_mask]
+    valid_conf1 = conf1_flat[valid_mask]
+    valid_conf2 = conf2_flat[valid_mask]
+    
+    combined_weights = (valid_conf1 * valid_conf2) ** weight_power
+    
+    combined_weights = combined_weights / (np.sum(combined_weights) + 1e-8)
+    
+    ratios = valid_depth1 / (valid_depth2 + 1e-8)
+    
+    sorted_indices = np.argsort(ratios)
+    sorted_ratios = ratios[sorted_indices]
+    sorted_weights = combined_weights[sorted_indices]
+    
+    cumulative_weights = np.cumsum(sorted_weights)
+    median_idx = np.searchsorted(cumulative_weights, 0.5)
+    scale_median = sorted_ratios[median_idx] if median_idx < len(sorted_ratios) else 1.0
+    
+    quantile_idx = np.searchsorted(cumulative_weights, robust_quantile)
+    scale_quantile = sorted_ratios[quantile_idx] if quantile_idx < len(sorted_ratios) else scale_median
+    
+    weight_entropy = -np.sum(combined_weights * np.log(combined_weights + 1e-8))
+    max_entropy = np.log(len(combined_weights))
+    confidence_score = 1.0 - (weight_entropy / max_entropy) if max_entropy > 0 else 0.0
+    
+    print(f"Weighted scale: {scale_quantile:.6f}, confidence: {confidence_score:.4f}")
+    
+    if 0.1 < scale_quantile < 10.0:
+        return scale_quantile, confidence_score
+    else:
+        print(f"Warning: Unreasonable scale {scale_quantile}, using 1.0")
+        return 1.0, confidence_score
+
+def compute_chunk_scale_advanced(depth1, depth2, conf1, conf2,   mask, method='auto'):
+    """
+        method: 'auto', 'ransac', 'weighted'
+    """
+    if method == 'ransac':
+        scale, score = compute_scale_ransac(depth1, depth2, conf1, conf2 ,mask)
+        return scale, score, 'ransac'
+    
+    elif method == 'weighted':
+        scale, score = compute_scale_weighted(depth1, depth2, conf1, conf2,mask)
+        return scale, score, 'weighted'
+    
+    elif method == 'auto':
+        scale_ransac, inlier_ratio = compute_scale_ransac(depth1, depth2, conf1, conf2)
+        scale_weighted, conf_score = compute_scale_weighted(depth1, depth2, conf1, conf2)
+        
+        ransac_quality = inlier_ratio
+        weighted_quality = conf_score
+        
+        print(f"RANSAC quality: {ransac_quality:.4f}, Weighted quality: {weighted_quality:.4f}")
+        
+        if ransac_quality > 0.7 and weighted_quality > 0.7:
+            # both method are good, we take both of them by average
+            final_scale = (scale_ransac + scale_weighted) / 2
+            final_method = 'average'
+        elif ransac_quality > weighted_quality:
+            final_scale = scale_ransac
+            final_method = 'ransac'
+        else:
+            final_scale = scale_weighted
+            final_method = 'weighted'
+          
+        final_quality = max(ransac_quality, weighted_quality)
+        return final_scale, final_quality, final_method
+
+def precompute_scale_chunks_with_depth(chunk1_depth, chunk1_conf, chunk2_depth, chunk2_conf,   mask,
+                               method='auto'):
+    """
+    Args:
+        chunk1_depth: (n1, h, w)
+        chunk1_conf: (n1, h, w)
+        chunk2_depth: (n2, h, w)
+        chunk2_conf: (n2, h, w)
+        method: 'auto', 'ransac', 'weighted'
+    """
+    
+    scale_factor, quality_score, method_used = compute_chunk_scale_advanced(
+        chunk1_depth, chunk2_depth, chunk1_conf, chunk2_conf,   mask, method
+    )
+    
+    print(f"Final scale: {scale_factor:.6f}, quality: {quality_score:.4f}, method: {method_used}")
+    
+    return scale_factor, quality_score, method_used
+
+# ===== Scale precompute end =====
+
+from loop_utils.alignment_triton import robust_weighted_estimate_sim3_triton
+from loop_utils.alignment_torch import robust_weighted_estimate_sim3_torch
+
+def weighted_align_point_maps(point_map1, conf1, point_map2, conf2,mask, conf_threshold, config, precompute_scale = None):
     """ point_map2 -> point_map1"""
     b1, _, _, _ = point_map1.shape
     b2, _, _, _ = point_map2.shape
     b = min(b1, b2)
+
+    if precompute_scale is not None: # meaning we are using align method 'scale+se3'
+        point_map2 *= precompute_scale
     
     aligned_points1 = []
     aligned_points2 = []
@@ -932,7 +1153,7 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, mask, conf_t
         mask2 = conf2[i] > conf_threshold
         valid_mask = mask1 & mask2
         if mask is not None:
-            valid_mask =valid_mask & mask[i].squeeze()
+            valid_mask = valid_mask & mask[i].squeeze()
 
         idx = np.where(valid_mask)
         if len(idx[0]) == 0:
@@ -956,25 +1177,49 @@ def weighted_align_point_maps(point_map1, conf1, point_map2, conf2, mask, conf_t
 
     print(f"The number of corresponding points matched: {all_pts1.shape[0]}")
     
-    if config['Model']['align_method'] == 'numba':
+    if config['Model']['align_lib'] == 'numba':
         s, R, t = robust_weighted_estimate_sim3_numba(all_pts2, 
                                                 all_pts1, 
                                                 all_weights,
                                                 delta=config['Model']['IRLS']['delta'],
                                                 max_iters=config['Model']['IRLS']['max_iters'],
                                                 tol=eval(config['Model']['IRLS']['tol']),
-                                                using_sim3=config['Model']['using_sim3']
+                                                align_method = config['Model']['align_method']
                                                 )
-    else: # numpy
+    elif config['Model']['align_lib'] == 'numpy': # numpy
         s, R, t = robust_weighted_estimate_sim3(all_pts2, 
                                                 all_pts1, 
                                                 all_weights,
                                                 delta=config['Model']['IRLS']['delta'],
                                                 max_iters=config['Model']['IRLS']['max_iters'],
                                                 tol=eval(config['Model']['IRLS']['tol']),
-                                                using_sim3=config['Model']['using_sim3']
+                                                align_method = config['Model']['align_method']
                                                 )
-
+    elif config['Model']['align_lib'] == 'torch': # torch
+        s, R, t = robust_weighted_estimate_sim3_torch(all_pts2, 
+                                                all_pts1, 
+                                                all_weights,
+                                                delta=config['Model']['IRLS']['delta'],
+                                                max_iters=config['Model']['IRLS']['max_iters'],
+                                                tol=eval(config['Model']['IRLS']['tol']),
+                                                align_method = config['Model']['align_method']
+                                                )
+    elif config['Model']['align_lib'] == 'triton': # triton
+        s, R, t = robust_weighted_estimate_sim3_triton(all_pts2, 
+                                                all_pts1, 
+                                                all_weights,
+                                                delta=config['Model']['IRLS']['delta'],
+                                                max_iters=config['Model']['IRLS']['max_iters'],
+                                                tol=eval(config['Model']['IRLS']['tol']),
+                                                align_method = config['Model']['align_method']
+                                                )
+    else:
+        raise ValueError(f"Unknown align_lib: {config['Model']['align_lib']}")
+    
+    if precompute_scale is not None: # meaning we are using align method 'scale+se3'
+        # we need this precompute_scale for loop align
+        s = precompute_scale
+        
     mean_error = compute_alignment_error(
         point_map1, conf1, 
         point_map2, conf2, 

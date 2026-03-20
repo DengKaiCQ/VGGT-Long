@@ -4,6 +4,9 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/utils/pose_enc.py
+
 import torch
 from .rotation import quat_to_mat, mat_to_quat
 

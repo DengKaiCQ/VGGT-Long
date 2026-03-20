@@ -1,0 +1,16 @@
+defaults:
+  - default
+  - encoder: croco_512_data_norm_dust3r
+  - info_sharing: cat_ifr_dust3r
+  - pred_head: dpt
+
+# String for model factory
+model_str: "modular_dust3r"
+# Model config
+model_config:
+  name: "dust3r_512_dpt"
+  encoder_config: ${model.encoder}
+  info_sharing_config: ${model.info_sharing}
+  pred_head_config: ${model.pred_head}
+# Image Normalization Type
+data_norm_type: "dust3r"

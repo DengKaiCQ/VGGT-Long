@@ -1,0 +1,17 @@
+[monodepth2]
+    root = '/tmp/monodepth2/'
+
+[mvsnet_pl]
+    root = '/tmp/mvsnet_pl'
+
+[midas]
+    root = '/tmp/midas'
+
+[patchmatchnet]
+    root = '/tmp/patchmatchnet'
+
+[cvp_mvsnet]
+    root = '/tmp/cvp_mvsnet'
+
+[vis_mvsnet]
+    root = '/tmp/vis_mvsnet'

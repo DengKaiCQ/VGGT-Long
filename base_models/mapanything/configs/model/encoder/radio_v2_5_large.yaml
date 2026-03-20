@@ -1,0 +1,10 @@
+# UniCeption encoder string used for selecting encoder class (python3 -m uniception.models.encoders.list)
+encoder_str: "radio"
+# Name of the encoder
+name: "radio_v2.5-large"
+# Data normalization type
+data_norm_type: "radio"
+# Model version
+model_version: "radio_v2.5-l"
+# Flag to indicate whether model class uses torch hub
+uses_torch_hub: True

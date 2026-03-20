@@ -1,0 +1,25 @@
+# model
+
+device: 'cuda:0'
+
+keyframe_threshold: 0.2
+min_cluster_size: 5
+max_cluster_size: 8
+k_candidate_clusters: 5
+k_kf_candidates_clusters: 5
+cluster_frame_conf_threshold: 0.05
+max_kf_search_distance: 1.5
+conf_min_early_stop_threshold: 0.6
+
+top_k_init_candidate: 5
+low_conf_frame_threshold: 0.1
+allow_unmapped_frames: true
+max_kf_per_refinement: 8
+non_kf_search_window: 0.2
+max_mapping_frames: 10
+max_pose_distance_per_kf_cluster: 1.2
+min_keyframes_per_cluster: 4
+max_keyframes_per_cluster: 8
+
+max_coarse_registration_iters: 5
+max_global_refinement_iters: 1

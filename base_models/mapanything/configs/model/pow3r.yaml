@@ -1,0 +1,19 @@
+defaults:
+  - default
+  - task: images_only
+
+# String for model factory
+model_str: "pow3r"
+# Model config
+model_config:
+  name: "pow3r"
+  # Checkpoint path
+  ckpt_path: "${root_pretrained_checkpoints_dir}/Pow3R_ViTLarge_BaseDecoder_512_linear.pth"
+  # Geometric input config
+  geometric_input_config: ${model.task}
+# Image Normalization Type
+data_norm_type: "dust3r"
+# Pow3R checkpoint is already loaded in the inference wrapper
+pretrained: null
+# Torch hub force reload
+torch_hub_force_reload: false

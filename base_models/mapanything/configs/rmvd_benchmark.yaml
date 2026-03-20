@@ -1,0 +1,34 @@
+defaults:
+  - machine: aws
+  - model: default
+  - dataset: default
+  - _self_
+
+# Path Settings
+output_dir: ${hydra:run.dir}
+external_benchmark_data_root_data_dir: ${machine.external_benchmark_data_root_data_dir}
+mapanything_dataset_metadata_dir: ${machine.mapanything_dataset_metadata_dir}
+root_pretrained_checkpoints_dir: ${machine.root_pretrained_checkpoints_dir}
+root_experiments_dir: ${machine.root_experiments_dir}
+root_uniception_pretrained_checkpoints_dir: ${machine.root_uniception_pretrained_checkpoints_dir}
+
+### Benchmarking args
+seed: 0
+# Disable CUDNN Benchmark (Disable for variable resolution & number of view training)
+disable_cudnn_benchmark: true
+# Batch size for inference (Metrics are computed per multi-view set and averaged, not per batch of multi-view sets)
+batch_size: 10
+# Use mixed precision for inference
+amp: 1
+# Floating point type to use for mixed precision
+amp_dtype: "bf16"
+# Choose from eth3d, kitti, scannet
+eval_dataset: eth3d
+# Choose from img, img+intrinsics, img+intrinsics+pose
+evaluation_conditioning: img
+# Choose from "median", "none"
+evaluation_alignment: median
+# Choose from "multi_view", "single_view"
+evaluation_views: multi_view
+# Resolution to inference the selected model.
+evaluation_resolution: ${dataset.resolution_options.518_1_33_ar}

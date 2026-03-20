@@ -1,0 +1,67 @@
+Metadata-Version: 2.4
+Name: mapanything
+Version: 1.1
+Summary: Universal Feed-Forward Metric 3D Reconstruction
+Author-email: Nikhil Keetha <keethanikhil@gmail.com>
+Requires-Python: >=3.10.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: huggingface_hub
+Requires-Dist: hydra-core
+Requires-Dist: natsort
+Requires-Dist: opencv-python-headless==4.10.0.84
+Requires-Dist: orjson
+Requires-Dist: pillow-heif
+Requires-Dist: plyfile
+Requires-Dist: python-box
+Requires-Dist: requests
+Requires-Dist: rerun-sdk~=0.24.1
+Requires-Dist: safetensors
+Requires-Dist: tensorboard
+Requires-Dist: tqdm
+Requires-Dist: trimesh
+Requires-Dist: uniception==0.1.6
+Provides-Extra: data
+Requires-Dist: pandas; extra == "data"
+Provides-Extra: dev
+Requires-Dist: pre-commit; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Provides-Extra: colmap
+Requires-Dist: lightglue@ git+https://github.com/cvg/LightGlue.git ; extra == "colmap"
+Requires-Dist: pycolmap==3.10.0; extra == "colmap"
+Provides-Extra: gradio
+Requires-Dist: gradio; extra == "gradio"
+Requires-Dist: spaces; extra == "gradio"
+Provides-Extra: radio
+Requires-Dist: timm; extra == "radio"
+Provides-Extra: anycalib
+Requires-Dist: anycalib@ git+https://github.com/javrtg/AnyCalib.git@main#egg=anycalib ; extra == "anycalib"
+Provides-Extra: dust3r
+Requires-Dist: croco@ git+https://github.com/naver/croco.git@croco_module#egg=croco ; extra == "dust3r"
+Requires-Dist: dust3r@ git+https://github.com/naver/dust3r.git@dust3r_setup#egg=dust3r ; extra == "dust3r"
+Provides-Extra: mast3r
+Requires-Dist: mast3r@ git+https://github.com/Nik-V9/mast3r.git@main#egg=mast3r ; extra == "mast3r"
+Provides-Extra: must3r
+Requires-Dist: must3r@ git+https://github.com/naver/must3r.git@main#egg=must3r ; extra == "must3r"
+Provides-Extra: pow3r
+Requires-Dist: pow3r@ git+https://github.com/Nik-V9/pow3r.git@main#egg=pow3r ; extra == "pow3r"
+Provides-Extra: depth-anything-3
+Requires-Dist: depth-anything-3@ git+https://github.com/Nik-V9/depth-anything-3.git@main#egg=depth-anything-3 ; extra == "depth-anything-3"
+Provides-Extra: rmvd
+Requires-Dist: rmvd@ git+https://github.com/infinity1096/robustmvd.git@master#egg=rmvd ; extra == "rmvd"
+Provides-Extra: all
+Requires-Dist: mapanything[anycalib]; extra == "all"
+Requires-Dist: mapanything[colmap]; extra == "all"
+Requires-Dist: mapanything[data]; extra == "all"
+Requires-Dist: mapanything[depth-anything-3]; extra == "all"
+Requires-Dist: mapanything[dev]; extra == "all"
+Requires-Dist: mapanything[dust3r]; extra == "all"
+Requires-Dist: mapanything[gradio]; extra == "all"
+Requires-Dist: mapanything[mast3r]; extra == "all"
+Requires-Dist: mapanything[must3r]; extra == "all"
+Requires-Dist: mapanything[pow3r]; extra == "all"
+Requires-Dist: mapanything[radio]; extra == "all"
+Requires-Dist: mapanything[rmvd]; extra == "all"
+Dynamic: license-file

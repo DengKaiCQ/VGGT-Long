@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wai-processing"
+version = "0.0.0"
+description = "Processing suite for the WorldAI Format (WAI) - (alpha) version"
+readme = "readme.md"
+authors = [{ name = "Meta Reality Labs Research" }]
+requires-python = ">=3.8.0"
+dependencies = [
+    "argconf",
+    "cython",
+    "einops",
+    "imageio",
+    "natsort",
+    "ninja",
+    "numpy",
+    "nvdiffrast @ git+https://github.com/NVlabs/nvdiffrast.git",
+    "omegaconf==2.4.0.dev3",
+    "open3d",
+    "opencv-python-headless==4.10.0.84",
+    "pandas",
+    "portalocker",
+    "pycolmap",
+    "pyrender",
+    "pyyaml",
+    "safetensors",
+    "spod",
+    "tqdm",
+    "trimesh",
+    "tyro",
+]
+
+[project.optional-dependencies]
+## Specific stages
+aria = ["projectaria-tools[all]"]
+moge = ["moge @ git+https://github.com/microsoft/MoGe.git"]
+mvsanywhere = [
+    "loguru",
+    "antialiased-cnns",
+    "h5py",
+    "kornia",
+    "timm",
+    "lightning",
+    "moviepy==1.0.3",
+]
+
+## Install all optional dependencies
+all = [
+    "wai-processing[aria]",
+    "wai-processing[moge]",
+    "wai-processing[mvsanywhere]",
+]
+
+[tool.setuptools]
+packages = ["wai_processing"]
+
+[tool.setuptools.package-dir]
+"wai_processing" = "."

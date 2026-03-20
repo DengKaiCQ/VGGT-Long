@@ -1,0 +1,27 @@
+stage: # set stage via CLI
+root: # path of wai-formatted dataset
+
+gpus: 0
+cpus: 10
+mem: 20
+scenes_per_job: 5  # Only 50 scenes --> 10 jobs
+conda_env: # pass the name of our conda environment
+nodelist:
+
+stages:
+  conversion:
+    script: conversion/spring.py
+    config: conversion/spring.yaml
+    scenes_per_job: 5
+  moge:
+    script: run_moge.py
+    config: moge/default.yaml
+    gpus: 1
+  covisibility:
+    script: covisibility.py
+    config: covisibility/covisibility_gt_depth.yaml
+    gpus: 1
+  covisibility_pred: # since some scenes in Spring do not contain GT depth
+    script: covisibility.py
+    config: covisibility/covisibility_pred_depth_moge.yaml
+    gpus: 1

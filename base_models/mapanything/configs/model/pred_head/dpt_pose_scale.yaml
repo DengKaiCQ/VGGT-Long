@@ -1,0 +1,22 @@
+defaults:
+  - adaptor_config: raydirs_depth_pose_confidence_mask_scale
+
+type: "dpt+pose"
+feature_head:
+  feature_dim: 256
+  hooks: [0, 1, 2, 3]
+  checkpoint_gradient: ${model.pred_head.gradient_checkpointing}
+regressor_head:
+  output_dim: ${model.pred_head.adaptor_config.input_dim}
+  checkpoint_gradient: ${model.pred_head.gradient_checkpointing}
+pose_head:
+  num_resconv_block: 2
+  rot_representation_dim: 4
+scale_head:
+  output_dim: 1
+adaptor_type: ${model.pred_head.adaptor_config.type}
+dpt_adaptor: ${model.pred_head.adaptor_config.dense_pred_init_dict}
+pose_adaptor: ${model.pred_head.adaptor_config.pose_pred_init_dict}
+scale_adaptor: ${model.pred_head.adaptor_config.scale_pred_init_dict}
+# Flag to indicate whether to use gradient checkpointing
+gradient_checkpointing: False

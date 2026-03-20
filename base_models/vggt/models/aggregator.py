@@ -4,7 +4,13 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+# References:
+#   https://github.com/facebookresearch/vggt/blob/main/vggt/models/aggregator.py
+
 import logging
+from pandas.core.config_init import pc_html_border_doc
+from sympy import false
+from sympy.sets.sets import true
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,11 +21,12 @@ from vggt.layers.block import Block
 from vggt.layers.rope import RotaryPositionEmbedding2D, PositionGetter
 from vggt.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2
 
+from vggt.utils import global_hw
+
 logger = logging.getLogger(__name__)
 
 _RESNET_MEAN = [0.485, 0.456, 0.406]
 _RESNET_STD = [0.229, 0.224, 0.225]
-
 
 class Aggregator(nn.Module):
     """
@@ -87,6 +94,7 @@ class Aggregator(nn.Module):
                     init_values=init_values,
                     qk_norm=qk_norm,
                     rope=self.rope,
+                    is_global=false,
                 )
                 for _ in range(depth)
             ]
@@ -104,6 +112,7 @@ class Aggregator(nn.Module):
                     init_values=init_values,
                     qk_norm=qk_norm,
                     rope=self.rope,
+                    is_global=global_hw.is_acc,
                 )
                 for _ in range(depth)
             ]
@@ -188,7 +197,15 @@ class Aggregator(nn.Module):
                 The list of outputs from the attention blocks,
                 and the patch_start_idx indicating where patch tokens begin.
         """
+        
         B, S, C_in, H, W = images.shape
+        
+        horizontal = true if H < W else false
+        max_token, min_token = max(H, W) // self.patch_size, min(H, W) // self.patch_size
+        if horizontal:
+            global_hw.update_var(min_token, max_token)
+        else:
+            global_hw.update_var(max_token, min_token)
 
         if C_in != 3:
             raise ValueError(f"Expected 3 input channels, got {C_in}")
@@ -211,7 +228,7 @@ class Aggregator(nn.Module):
 
         # Concatenate special tokens with patch tokens
         tokens = torch.cat([camera_token, register_token, patch_tokens], dim=1)
-
+        
         pos = None
         if self.rope is not None:
             pos = self.position_getter(B * S, H // self.patch_size, W // self.patch_size, device=images.device)

@@ -1,0 +1,16 @@
+[eth3d]
+    root = '../data/rmvd/eth3d/'
+
+[kitti]
+    root = '../data/rmvd/kitti/'
+
+[dtu]
+    root = '../data/rmvd/dtu/'
+
+[scannet]
+    root = '../data/rmvd/scannet/'
+
+[tanks_and_temples]
+    root = '../data/rmvd/tnt/'
+
+

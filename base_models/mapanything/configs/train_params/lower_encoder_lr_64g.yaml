@@ -1,0 +1,16 @@
+defaults:
+  - default
+
+# Use 2x higher lr for 8x higher effective batch size
+lr: 2e-04
+min_lr: 2e-07
+
+# Optimizer parameters specific to submodules
+submodule_configs:
+  # Encoder
+  encoder:
+    lr: 1e-05
+    min_lr: 1e-08
+    warmup_epochs: ${train_params.warmup_epochs}
+    weight_decay: ${train_params.weight_decay}
+    schedule_type: ${train_params.schedule_type}

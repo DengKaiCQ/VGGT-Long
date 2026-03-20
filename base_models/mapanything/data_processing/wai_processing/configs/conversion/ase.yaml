@@ -1,0 +1,18 @@
+original_root: # path of raw downloaded dataset
+root: # path of wai-formatted dataset
+
+original_root_scene_config_path: null # Original root directory of the scene_config.json files if different from `original_root`
+ase_calib_json_path: # Sensors calibration
+
+dataset_name: asev2
+version: 0.1
+rotate_to_portrait: True
+overwrite: True
+sensor_names: ["camera-rgb", "camera-slam-left", "camera-slam-right"]
+
+additional_processing_states: [
+  [undistortion, finished],
+]
+
+scene_filters:
+  - process_state_not: [conversion, finished]

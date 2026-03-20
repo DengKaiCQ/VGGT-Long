@@ -1,0 +1,16 @@
+defaults:
+  - default
+
+# Use 20x lower lr for finetuning
+lr: 1e-05
+min_lr: 1e-07
+
+# Optimizer parameters specific to submodules
+submodule_configs:
+  # Encoder
+  encoder:
+    lr: 5e-07
+    min_lr: 5e-09
+    warmup_epochs: ${train_params.warmup_epochs}
+    weight_decay: ${train_params.weight_decay}
+    schedule_type: ${train_params.schedule_type}

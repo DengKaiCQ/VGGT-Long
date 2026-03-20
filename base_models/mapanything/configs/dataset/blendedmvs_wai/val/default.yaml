@@ -1,0 +1,26 @@
+dataset_str:
+  "BlendedMVSWAI(
+    split='${dataset.blendedmvs_wai.val.split}',
+    resolution=${dataset.blendedmvs_wai.val.dataset_resolution},
+    principal_point_centered=${dataset.blendedmvs_wai.val.principal_point_centered},
+    seed=${dataset.blendedmvs_wai.val.seed},
+    transform='${dataset.blendedmvs_wai.val.transform}',
+    data_norm_type='${dataset.blendedmvs_wai.val.data_norm_type}',
+    ROOT='${dataset.blendedmvs_wai.val.ROOT}',
+    dataset_metadata_dir='${dataset.blendedmvs_wai.val.dataset_metadata_dir}',
+    overfit_num_sets=${dataset.blendedmvs_wai.val.overfit_num_sets},
+    variable_num_views=${dataset.blendedmvs_wai.val.variable_num_views},
+    num_views=${dataset.blendedmvs_wai.val.num_views},
+    covisibility_thres=${dataset.blendedmvs_wai.val.covisibility_thres})"
+split: 'val'
+dataset_resolution: ${dataset.resolution_val_blendedmvs}
+principal_point_centered: ${dataset.principal_point_centered}
+seed: 777
+transform: 'imgnorm'
+data_norm_type: ${model.data_norm_type}
+ROOT: ${root_data_dir}/blendedmvs
+dataset_metadata_dir: ${mapanything_dataset_metadata_dir}
+overfit_num_sets: null
+variable_num_views: ${dataset.val.variable_num_views}
+num_views: ${dataset.num_views}
+covisibility_thres: 0.25

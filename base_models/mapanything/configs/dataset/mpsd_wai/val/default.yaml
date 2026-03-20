@@ -1,0 +1,26 @@
+dataset_str:
+  "MPSDWAI(
+    split='${dataset.mpsd_wai.val.split}',
+    resolution=${dataset.mpsd_wai.val.dataset_resolution},
+    principal_point_centered=${dataset.mpsd_wai.val.principal_point_centered},
+    seed=${dataset.mpsd_wai.val.seed},
+    transform='${dataset.mpsd_wai.val.transform}',
+    data_norm_type='${dataset.mpsd_wai.val.data_norm_type}',
+    ROOT='${dataset.mpsd_wai.val.ROOT}',
+    dataset_metadata_dir='${dataset.mpsd_wai.val.dataset_metadata_dir}',
+    overfit_num_sets=${dataset.mpsd_wai.val.overfit_num_sets},
+    variable_num_views=${dataset.mpsd_wai.val.variable_num_views},
+    num_views=${dataset.mpsd_wai.val.num_views},
+    covisibility_thres=${dataset.mpsd_wai.val.covisibility_thres})"
+split: 'val'
+dataset_resolution: ${dataset.resolution_val_mpsd}
+principal_point_centered: ${dataset.principal_point_centered}
+seed: 777
+transform: 'imgnorm'
+data_norm_type: ${model.data_norm_type}
+ROOT: ${root_data_dir}/mpsd
+dataset_metadata_dir: ${mapanything_dataset_metadata_dir}
+overfit_num_sets: null
+variable_num_views: ${dataset.val.variable_num_views}
+num_views: ${dataset.num_views}
+covisibility_thres: 0.15

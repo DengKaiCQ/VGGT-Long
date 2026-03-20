@@ -1,0 +1,16 @@
+# UniCeption encoder string used for selecting encoder class (python3 -m uniception.models.encoders.list)
+encoder_str: "croco"
+# Name of the encoder
+name: "croco_512_img_norm_dust3r"
+# Data normalization type
+data_norm_type: "dust3r"
+# Patch embedding class
+patch_embed_cls: "PatchEmbedDust3R"
+# Image size
+img_size: [512, 512] # This parameter has no influence for PatchEmbedDust3R
+# Path to the pretrained encoder checkpoint
+pretrained_checkpoint_path: '${machine.root_uniception_pretrained_checkpoints_dir}/encoders/CroCo_Encoder_224.pth'
+# Override attributes in the pretrained checkpoint
+override_checkpoint_attributes: True
+# Flag to indicate whether model class uses torch hub
+uses_torch_hub: False

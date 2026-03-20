@@ -1,0 +1,17 @@
+root:
+scene_meta_path: scene_meta_distorted.json
+
+scene_filters:
+  - exists: ${scene_meta_path}
+  - process_state: [conversion, finished]
+  - process_state_not: [undistortion, finished]
+
+frame_modalities: # what to load for each frame
+  - image_distorted
+
+center_principal_point: True # set the principal point to the image center
+store_as_jpg: True # store as jpeg to save storage
+random_scene_processing_order: true
+
+batch_size: 4
+num_workers: 4

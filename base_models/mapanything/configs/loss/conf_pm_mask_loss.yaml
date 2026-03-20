@@ -1,0 +1,4 @@
+# Training Loss
+train_criterion: "ConfLoss(Regr3D(RobustRegressionLoss(alpha=0.5, scaling_c=0.05), norm_mode='?avg_dis', loss_in_log=True), alpha=0.2) + 0.3 * NonAmbiguousMaskLoss(BCELoss())"
+# Validation Loss
+test_criterion: "ExcludeTopNPercentPixelLoss(Regr3D(RobustRegressionLoss(alpha=0.5, scaling_c=0.05), norm_mode='?avg_dis', flatten_across_image_only=True, loss_in_log=True), top_n_percent=5, apply_to_real_data_only=True) + 0.3 * NonAmbiguousMaskLoss(BCELoss())"

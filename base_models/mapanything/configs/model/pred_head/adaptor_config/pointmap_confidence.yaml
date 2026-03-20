@@ -1,0 +1,13 @@
+# Pointmap + Confidence
+input_dim: 4
+scene_rep_dim: 3
+type: "pointmap+confidence"
+scene_rep_type: "pointmap"
+init_dict:
+  name: "pointmap+confidence"
+  pointmap_mode: "exp"
+  pointmap_vmin: ${special_float:"-inf"}
+  pointmap_vmax: ${special_float:"inf"}
+  confidence_type: "exp"
+  confidence_vmin: 1
+  confidence_vmax: ${special_float:"inf"}
